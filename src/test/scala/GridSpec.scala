@@ -15,4 +15,20 @@ class GridSpec extends Specification {
     }
   }
 
+  "converting a Grid to a String" should {
+    "return the letters separated into rows by newlines, representing empty cells as underscores" in {
+      Grid(Seq(Some('a'), None, Some('c'), Some('d')), 2).toString mustEqual
+        """a_
+          |cd""".stripMargin
+    }
+  }
+
+  "converting a String to a Grid" should {
+    "return the correct Grid, parsing underscores as empty cells" in {
+      Grid.fromString(
+        """a_
+          |cd""".stripMargin) mustEqual Grid(Seq(Some('a'), None, Some('c'), Some('d')), 2)
+    }
+  }
+
 }
