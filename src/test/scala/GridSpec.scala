@@ -11,7 +11,35 @@ class GridSpec extends Specification {
     }
     "not throw an exception if the number of letters is a multiple of the width" in {
       Grid(Seq(Some('a'), Some('b'), Some('c'), Some('d')), 2) must not(throwAn[Exception])
-      Grid(Seq(Some('a'), Some('b'), Some('c'), None), 2) must not(throwAn[Exception])
+      Grid(Seq(None, Some('b'), Some('c'), Some('d')), 2) must not(throwAn[Exception])
+    }
+    "throw an exception if any columns contain empty gaps below letters" in {
+      Grid.fromString(
+        """abc
+          |def
+          |g_i
+          |""".stripMargin) must throwAn[IllegalArgumentException]
+    }
+    "throw an exception if any columns contain empty gaps between letters" in {
+      Grid.fromString(
+        """abc
+          |_ef
+          |ghi
+          |""".stripMargin) must throwAn[IllegalArgumentException]
+    }
+    "not throw an exception if a column is entirely empty" in {
+      Grid.fromString(
+        """ab_
+          |de_
+          |gh_
+          |""".stripMargin) must not(throwAn[Exception])
+    }
+    "not throw an exception if a column contains empty gaps above letters" in {
+      Grid.fromString(
+        """ab_
+          |de_
+          |ghi
+          |""".stripMargin) must not(throwAn[Exception])
     }
   }
 

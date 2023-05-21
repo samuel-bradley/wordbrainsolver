@@ -2,6 +2,7 @@ package com.wordbrainsolver.application
 
 case class Grid(letters: Seq[Option[Char]], width: Int) {
   require(letters.length % width == 0, s"Number of letters (${letters.length}) must be multiple of width ($width)")
+  require(!lettersContainEmptyGaps(), s"Grid may not contain empty gaps in columns - grid:\n" + toString)
 
   private val height: Int = letters.length / width
 
@@ -25,6 +26,21 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
   private def coordinatesAreInGrid(row: Int, col: Int): Boolean = {
     row >= 1 && row <= width &&
       col >= 1 && col <= height
+  }
+
+  private def lettersContainEmptyGaps(): Boolean = {
+    def getColumn(col: Int): Seq[Option[Char]] = {
+      val rows = letters.grouped(width)
+      rows.map(row => row(col - 1)).toSeq
+    }
+    def columnContainsEmptyGap(column: Seq[Option[Char]]): Boolean = {
+      column.zipWithIndex.exists { case (letter, index) =>
+        val previousLetter: Option[Char] = if (index == 0) None else column(index - 1)
+        letter.isEmpty && previousLetter.isDefined
+      }
+    }
+
+    (1 to width).exists(col => columnContainsEmptyGap(getColumn(col)))
   }
 
   override def toString: String = {
