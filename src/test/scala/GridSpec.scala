@@ -31,4 +31,28 @@ class GridSpec extends Specification {
     }
   }
 
+  "retrieving the letter at a particular row and column" should {
+    val grid: Grid = Grid.fromString(
+      """a_c
+        |def
+        |ghi
+        |""".stripMargin
+    )
+    "return a letter from the top-left corner" in {
+      grid.letterAt(1, 1) must beSome('a')
+    }
+    "return a letter from the middle of the grid" in {
+      grid.letterAt(2, 2) must beSome('e')
+    }
+    "return a letter from the bottom-right corner" in {
+      grid.letterAt(3, 3) must beSome('i')
+    }
+    "return None for an empty cell" in {
+      grid.letterAt(1, 2) must beNone
+    }
+    "throw an IndexOutOfBoundsException for a row and column outside the grid" in {
+      grid.letterAt(100, 100) must throwAn[IndexOutOfBoundsException]
+    }
+  }
+
 }

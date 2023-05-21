@@ -3,6 +3,10 @@ package com.wordbrainsolver.application
 case class Grid(letters: Seq[Option[Char]], width: Int) {
   require(letters.length % width == 0, s"Number of letters (${letters.length}) must be multiple of width ($width)")
 
+  def letterAt(row: Int, col: Int): Option[Char] = {
+    letters((row - 1) * width + col - 1)
+  }
+
   override def toString: String = {
     letters.grouped(width).map((rowLetters: Seq[Option[Char]]) => {
       rowLetters.map(_.getOrElse(Grid.emptyLetterChar)).mkString
