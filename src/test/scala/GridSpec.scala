@@ -55,4 +55,35 @@ class GridSpec extends Specification {
     }
   }
 
+  "retrieving the coordinates of all neighbouring non-blank letters" should {
+    val grid: Grid = Grid.fromString(
+      """ab_
+        |def
+        |ghi
+        |""".stripMargin
+    )
+    "return just rightward and downward coordinates for the top-left corner" in {
+      grid.nonEmptyNeighbouringCoordinates(1, 1) must containTheSameElementsAs(Seq(
+        (1, 2),
+        (2, 1), (2, 2)
+      ))
+    }
+    "return the full set of coordinates for a letter in the middle of the grid, ignoring blanks" in {
+      grid.nonEmptyNeighbouringCoordinates(2, 2) must containTheSameElementsAs(Seq(
+        (1, 1), (1, 2),
+        (2, 1), (2, 3),
+        (3, 1), (3, 2), (3, 3)
+      ))
+    }
+    "return just the leftward and upward coordinates for the bottom-right corner" in {
+      grid.nonEmptyNeighbouringCoordinates(3, 3) must containTheSameElementsAs(Seq(
+        (2, 2), (2, 3),
+        (3, 2)
+      ))
+    }
+    "throw an IllegalArgumentException for a row and column outside the grid" in {
+      grid.nonEmptyNeighbouringCoordinates(100, 100) must throwAn[IllegalArgumentException]
+    }
+  }
+
 }
