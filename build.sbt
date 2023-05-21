@@ -7,3 +7,5 @@ lazy val root = (project in file("."))
     name := "wordbrainsolver",
     idePackagePrefix := Some("com.wordbrainsolver.application")
   )
+
+libraryDependencies += "org.specs2" % "specs2-junit_2.13" % "4.19.2"
