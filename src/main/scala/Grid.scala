@@ -23,24 +23,41 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
     }
   }
 
+  def withWordRemoved(letterCoordinates: Seq[(Int, Int)]): Grid = {
+    def indexToCoordinates(index: Int): (Int, Int) = (index / width + 1, index % width + 1)
+    val lettersWithNewEmpties: Seq[Option[Char]] = letters.zipWithIndex.map { case (letter: Option[Char], index: Int) =>
+        if (letterCoordinates.contains(indexToCoordinates(index))) None
+        else letter
+    }
+    Grid(collapseLetters(lettersWithNewEmpties), width)
+  }
+
+  private def collapseLetters(letters: Seq[Option[Char]]): Seq[Option[Char]] = {
+    val collapsedColumns: Seq[Seq[Option[Char]]] = (1 to width).map { col =>
+      val (emptyLetters, nonEmptyLetters) = getColumn(letters, col).partition(_.isEmpty)
+      emptyLetters ++ nonEmptyLetters
+    }
+    (1 to height).flatMap(row => collapsedColumns.map(column => column(row - 1)))
+  }
+
   private def coordinatesAreInGrid(row: Int, col: Int): Boolean = {
     row >= 1 && row <= width &&
       col >= 1 && col <= height
   }
 
   private def lettersContainEmptyGaps(): Boolean = {
-    def getColumn(col: Int): Seq[Option[Char]] = {
-      val rows = letters.grouped(width)
-      rows.map(row => row(col - 1)).toSeq
-    }
-    def columnContainsEmptyGap(column: Seq[Option[Char]]): Boolean = {
-      column.zipWithIndex.exists { case (letter, index) =>
-        val previousLetter: Option[Char] = if (index == 0) None else column(index - 1)
-        letter.isEmpty && previousLetter.isDefined
-      }
-    }
+    (1 to width).exists(col => columnContainsEmptyGap(getColumn(letters, col)))
+  }
 
-    (1 to width).exists(col => columnContainsEmptyGap(getColumn(col)))
+  private def getColumn(letters: Seq[Option[Char]], col: Int): Seq[Option[Char]] = {
+    val rows = letters.grouped(width)
+    rows.map(row => row(col - 1)).toSeq
+  }
+  private def columnContainsEmptyGap(column: Seq[Option[Char]]): Boolean = {
+    column.zipWithIndex.exists { case (letter, index) =>
+      val letterAbove: Option[Char] = if (index == 0) None else column(index - 1)
+      letter.isEmpty && letterAbove.isDefined
+    }
   }
 
   override def toString: String = {

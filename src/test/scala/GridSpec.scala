@@ -114,4 +114,20 @@ class GridSpec extends Specification {
     }
   }
 
+  "removing a word from a grid" should {
+    "return a new grid with empty letters collapsed" in {
+      val grid: Grid = Grid.fromString(
+        """abcde
+          |fghij
+          |klmno
+          |""".stripMargin)
+      // Word is "chin":
+      grid.withWordRemoved(Seq((1, 3), (2, 3), (2, 4), (3, 4))) mustEqual Grid.fromString(
+        """ab__e
+          |fg__j
+          |klmdo
+          |""".stripMargin)
+    }
+  }
+
 }
