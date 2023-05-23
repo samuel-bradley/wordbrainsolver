@@ -17,29 +17,25 @@ class GridSpec extends Specification {
       Grid.fromString(
         """abc
           |def
-          |g_i
-          |""".stripMargin) must throwAn[IllegalArgumentException]
+          |g_i""".stripMargin) must throwAn[IllegalArgumentException]
     }
     "throw an exception if any columns contain empty gaps between letters" in {
       Grid.fromString(
         """abc
           |_ef
-          |ghi
-          |""".stripMargin) must throwAn[IllegalArgumentException]
+          |ghi""".stripMargin) must throwAn[IllegalArgumentException]
     }
     "not throw an exception if a column is entirely empty" in {
       Grid.fromString(
         """ab_
           |de_
-          |gh_
-          |""".stripMargin) must not(throwAn[Exception])
+          |gh_""".stripMargin) must not(throwAn[Exception])
     }
     "not throw an exception if a column contains empty gaps above letters" in {
       Grid.fromString(
         """ab_
           |de_
-          |ghi
-          |""".stripMargin) must not(throwAn[Exception])
+          |ghi""".stripMargin) must not(throwAn[Exception])
     }
   }
 
@@ -63,8 +59,7 @@ class GridSpec extends Specification {
     val grid: Grid = Grid.fromString(
       """a_c
         |def
-        |ghi
-        |""".stripMargin
+        |ghi""".stripMargin
     )
     "return a letter from the top-left corner" in {
       grid.letterAt(1, 1) must beSome('a')
@@ -87,8 +82,7 @@ class GridSpec extends Specification {
     val grid: Grid = Grid.fromString(
       """ab_
         |def
-        |ghi
-        |""".stripMargin
+        |ghi""".stripMargin
     )
     "return just rightward and downward coordinates for the top-left corner" in {
       grid.nonEmptyNeighbouringCoordinates(1, 1) must containTheSameElementsAs(Seq(
@@ -119,14 +113,12 @@ class GridSpec extends Specification {
       val grid: Grid = Grid.fromString(
         """abcde
           |fghij
-          |klmno
-          |""".stripMargin)
+          |klmno""".stripMargin)
       // Word is "chin":
       grid.withWordRemoved(Seq((1, 3), (2, 3), (2, 4), (3, 4))) mustEqual Grid.fromString(
         """ab__e
           |fg__j
-          |klmdo
-          |""".stripMargin)
+          |klmdo""".stripMargin)
     }
   }
 
@@ -135,16 +127,14 @@ class GridSpec extends Specification {
       val grid: Grid = Grid.fromString(
         """a____
           |f_h_j
-          |k_mno
-          |""".stripMargin)
+          |k_mno""".stripMargin)
       (1 to 5).map { wordLength => grid.wordOfLengthCouldExist(wordLength) must beTrue }
     }
     "return false when no letter island exists big enough to contain the word" in {
       val grid: Grid = Grid.fromString(
         """a____
           |f_h_j
-          |k_mno
-          |""".stripMargin)
+          |k_mno""".stripMargin)
       grid.wordOfLengthCouldExist(6) must beFalse
     }
   }
@@ -154,8 +144,7 @@ class GridSpec extends Specification {
       val grid: Grid = Grid.fromString(
         """_b_
           |_ef
-          |_hi
-          |""".stripMargin
+          |_hi""".stripMargin
       )
       grid.nonEmptyCoordinates() must containTheSameElementsAs(Seq((1, 2), (2, 2), (3, 2), (2, 3), (3, 3)))
     }
