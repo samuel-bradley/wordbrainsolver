@@ -32,6 +32,26 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
     Grid(collapseLetters(lettersWithNewEmpties), width)
   }
 
+  def wordOfLengthCouldExist(wordLength: Int): Boolean = {
+    findLetterIslandSizes().exists(_ >= wordLength)
+  }
+
+  private def findLetterIslandSizes(): Seq[Int] = {
+    val nonEmptyCols = (1 to width).filter(col => getColumn(letters, col).exists(_.isDefined))
+    // Find the number of each non-empty column which is the first in a run of non-empty columns
+    val nonEmptyColGroupStartCols: Seq[Int] = nonEmptyCols.filter(col => nonEmptyCols.contains(col + 1) || col + 1 > width)
+    // Starting from each first non-empty column, build the group of the following non-empty columns
+    val nonEmptyColGroups: Seq[Seq[Int]] = nonEmptyColGroupStartCols.map { startCol =>
+      (startCol to width).takeWhile(col => nonEmptyCols.contains(col))
+    }
+    nonEmptyColGroups.map { nonEmptyColGroup: Seq[Int] =>
+      // For each group of non-empty columns, sum the number of letters in each column
+      nonEmptyColGroup.fold(0) { case (sum, col) =>
+        sum + getColumn(letters, col).count(_.isDefined)
+      }
+    }
+  }
+
   private def collapseLetters(letters: Seq[Option[Char]]): Seq[Option[Char]] = {
     val collapsedColumns: Seq[Seq[Option[Char]]] = (1 to width).map { col =>
       val (emptyLetters, nonEmptyLetters) = getColumn(letters, col).partition(_.isEmpty)

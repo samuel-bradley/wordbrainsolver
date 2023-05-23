@@ -130,4 +130,23 @@ class GridSpec extends Specification {
     }
   }
 
+  "checking whether a word of a given length could exist in the grid" should {
+    "return true when a letter island exists big enough to contain the word" in {
+      val grid: Grid = Grid.fromString(
+        """a____
+          |f_h_j
+          |k_mno
+          |""".stripMargin)
+      (1 to 5).map { wordLength => grid.wordOfLengthCouldExist(wordLength) must beTrue }
+    }
+    "return false when no letter island exists big enough to contain the word" in {
+      val grid: Grid = Grid.fromString(
+        """a____
+          |f_h_j
+          |k_mno
+          |""".stripMargin)
+      grid.wordOfLengthCouldExist(6) must beFalse
+    }
+  }
+
 }
