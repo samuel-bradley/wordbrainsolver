@@ -36,6 +36,14 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
     findLetterIslandSizes().exists(_ >= wordLength)
   }
 
+  def nonEmptyCoordinates(): Seq[(Int, Int)] = {
+    (1 to height).flatMap { row =>
+      (1 to width).flatMap { col =>
+        if (letterAt(row, col).isDefined) Some((row, col)) else None
+      }
+    }
+  }
+
   private def findLetterIslandSizes(): Seq[Int] = {
     val nonEmptyCols = (1 to width).filter(col => getColumn(letters, col).exists(_.isDefined))
     // Find the number of each non-empty column which is the first in a run of non-empty columns

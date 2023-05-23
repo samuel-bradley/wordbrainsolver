@@ -149,4 +149,16 @@ class GridSpec extends Specification {
     }
   }
 
+  "getting the coordinates of non-empty letters in the grid" should {
+    "return only the coordinates of non-empty letters" in {
+      val grid: Grid = Grid.fromString(
+        """_b_
+          |_ef
+          |_hi
+          |""".stripMargin
+      )
+      grid.nonEmptyCoordinates() must containTheSameElementsAs(Seq((1, 2), (2, 2), (3, 2), (2, 3), (3, 3)))
+    }
+  }
+
 }
