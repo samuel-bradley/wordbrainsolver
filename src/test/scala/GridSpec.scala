@@ -53,6 +53,11 @@ class GridSpec extends Specification {
         """a_
           |cd""".stripMargin) mustEqual Grid(Seq(Some('a'), None, Some('c'), Some('d')), 2)
     }
+    "work for a grid with no empty letters" in {
+      Grid.fromString(
+        """ab
+          |cd""".stripMargin) mustEqual Grid(Seq(Some('a'), Some('b'), Some('c'), Some('d')), 2)
+    }
   }
 
   "retrieving the letter at a particular row and column" should {
@@ -62,19 +67,19 @@ class GridSpec extends Specification {
         |ghi""".stripMargin
     )
     "return a letter from the top-left corner" in {
-      grid.letterAt(1, 1) must beSome('a')
+      grid.letterAt(Coordinates(1, 1)) must beSome('a')
     }
     "return a letter from the middle of the grid" in {
-      grid.letterAt(2, 2) must beSome('e')
+      grid.letterAt(Coordinates(2, 2)) must beSome('e')
     }
     "return a letter from the bottom-right corner" in {
-      grid.letterAt(3, 3) must beSome('i')
+      grid.letterAt(Coordinates(3, 3)) must beSome('i')
     }
     "return None for an empty cell" in {
-      grid.letterAt(1, 2) must beNone
+      grid.letterAt(Coordinates(1, 2)) must beNone
     }
     "throw an IndexOutOfBoundsException for a row and column outside the grid" in {
-      grid.letterAt(100, 100) must throwAn[IndexOutOfBoundsException]
+      grid.letterAt(Coordinates(100, 100)) must throwAn[IndexOutOfBoundsException]
     }
   }
 
@@ -85,26 +90,26 @@ class GridSpec extends Specification {
         |ghi""".stripMargin
     )
     "return just rightward and downward coordinates for the top-left corner" in {
-      grid.nonEmptyNeighbouringCoordinates(1, 1) must containTheSameElementsAs(Seq(
-        (1, 2),
-        (2, 1), (2, 2)
+      grid.nonEmptyNeighbouringCoordinates(Coordinates(1, 1)) must containTheSameElementsAs(Seq(
+        Coordinates(1, 2),
+        Coordinates(2, 1), Coordinates(2, 2)
       ))
     }
     "return the full set of coordinates for a letter in the middle of the grid, ignoring blanks" in {
-      grid.nonEmptyNeighbouringCoordinates(2, 2) must containTheSameElementsAs(Seq(
-        (1, 1), (1, 2),
-        (2, 1), (2, 3),
-        (3, 1), (3, 2), (3, 3)
+      grid.nonEmptyNeighbouringCoordinates(Coordinates(2, 2)) must containTheSameElementsAs(Seq(
+        Coordinates(1, 1), Coordinates(1, 2),
+        Coordinates(2, 1), Coordinates(2, 3),
+        Coordinates(3, 1), Coordinates(3, 2), Coordinates(3, 3)
       ))
     }
     "return just the leftward and upward coordinates for the bottom-right corner" in {
-      grid.nonEmptyNeighbouringCoordinates(3, 3) must containTheSameElementsAs(Seq(
-        (2, 2), (2, 3),
-        (3, 2)
+      grid.nonEmptyNeighbouringCoordinates(Coordinates(3, 3)) must containTheSameElementsAs(Seq(
+        Coordinates(2, 2), Coordinates(2, 3),
+        Coordinates(3, 2)
       ))
     }
     "throw an IllegalArgumentException for a row and column outside the grid" in {
-      grid.nonEmptyNeighbouringCoordinates(100, 100) must throwAn[IllegalArgumentException]
+      grid.nonEmptyNeighbouringCoordinates(Coordinates(100, 100)) must throwAn[IllegalArgumentException]
     }
   }
 
@@ -115,7 +120,7 @@ class GridSpec extends Specification {
           |fghij
           |klmno""".stripMargin)
       // Word is "chin":
-      grid.withWordRemoved(Seq((1, 3), (2, 3), (2, 4), (3, 4))) mustEqual Grid.fromString(
+      grid.withWordRemoved(GridPath(Seq(Coordinates(1, 3), Coordinates(2, 3), Coordinates(2, 4), Coordinates(3, 4)))) mustEqual Grid.fromString(
         """ab__e
           |fg__j
           |klmdo""".stripMargin)
@@ -146,7 +151,7 @@ class GridSpec extends Specification {
           |_ef
           |_hi""".stripMargin
       )
-      grid.nonEmptyCoordinates() must containTheSameElementsAs(Seq((1, 2), (2, 2), (3, 2), (2, 3), (3, 3)))
+      grid.nonEmptyCoordinates() must containTheSameElementsAs(Seq(Coordinates(1, 2), Coordinates(2, 2), Coordinates(3, 2), Coordinates(2, 3), Coordinates(3, 3)))
     }
   }
 
