@@ -67,8 +67,8 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
   }
 
   private def coordinatesAreInGrid(coordinates: Coordinates): Boolean = {
-    coordinates.row >= 1 && coordinates.row <= width &&
-      coordinates.col >= 1 && coordinates.col <= height
+    coordinates.row >= 1 && coordinates.row <= height &&
+      coordinates.col >= 1 && coordinates.col <= width
   }
 
   private def lettersContainEmptyGaps(): Boolean = {
