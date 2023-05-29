@@ -10,8 +10,8 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
     letters((coordinates.row - 1) * width + coordinates.col - 1)
   }
 
-  def wordAt(wordPath: GridPath): String = {
-    wordPath.coordinates.flatMap(letterAt).mkString
+  def wordAt(gridPath: GridPath): String = {
+    gridPath.coordinates.flatMap(letterAt).mkString
   }
 
   def nonEmptyNeighbouringCoordinates(coordinates: Coordinates): Seq[Coordinates] = {
@@ -23,10 +23,10 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
       .filter(coordinates => coordinatesAreInGrid(coordinates) && letterAt(coordinates).isDefined)
   }
 
-  def withWordRemoved(wordPath: GridPath): Grid = {
+  def withWordRemoved(gridPath: GridPath): Grid = {
     def indexToCoordinates(index: Int): Coordinates = Coordinates(index / width + 1, index % width + 1)
     val lettersWithNewEmpties: Seq[Option[Char]] = letters.zipWithIndex.map { case (letter: Option[Char], index: Int) =>
-        if (wordPath.coordinates.contains(indexToCoordinates(index))) None
+        if (gridPath.coordinates.contains(indexToCoordinates(index))) None
         else letter
     }
     Grid(collapseLetters(lettersWithNewEmpties), width)
