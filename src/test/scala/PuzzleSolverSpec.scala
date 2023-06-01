@@ -8,7 +8,9 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 class PuzzleSolverSpec extends Specification{
 
   // https://www-personal.umich.edu/~jlawler/wordlist
-  private val dictionary = Files.readAllLines(Path.of("C:\\Users\\Samuel\\Documents\\wordbrainsolver\\src\\main\\scala\\dictionary.txt")).asScala.toSeq
+  // TODO it was necessary to add "ribs" to make a test pass, so this file is evidently not sufficient
+  private val dictionary = (Files.readAllLines(Path.of("C:\\Users\\Samuel\\Documents\\wordbrainsolver\\src\\main\\scala\\dictionary.txt"))
+    .asScala.toSeq :+ "ribs").sorted
   private val solver = new PuzzleSolver(dictionary)
 
   "Solving a puzzle" should {
@@ -21,8 +23,8 @@ class PuzzleSolverSpec extends Specification{
       solver.findPossibleSolutions(puzzle).map(paths => gridPathsToWords(grid, paths)) mustEqual Seq(
         Seq("tack", "thebe"),
         Seq("tack", "thebe"),
-        Seq("back", "teeth"),
-        Seq("back", "teeth")
+        Seq("back", "teeth"), // actual solution
+        Seq("back", "teeth") // actual solution
       )
     }
     "find the possible solutions for a puzzle with only one word" in {
@@ -55,12 +57,29 @@ class PuzzleSolverSpec extends Specification{
         Seq("fuse", "bosh", "alms"),
         Seq("bush", "leaf", "moss"),
         Seq("bush", "flea", "moss"),
-        Seq("bush", "moss", "leaf"),
+        Seq("bush", "moss", "leaf"), // actual solution
         Seq("bush", "moss", "flea"),
         Seq("bosh", "alms", "fuse"),
         Seq("bosh", "fuse", "alms"),
         Seq("moss", "bush", "leaf"),
         Seq("moss", "bush", "flea")
+      ))
+    }
+    "find the possible solutions for a five-by-four grid with four words" in {
+      val grid = Grid.fromString(
+        """agbs
+          |toak
+          |sdir
+          |atoe
+          |phts""".stripMargin)
+      val puzzle = Puzzle(grid, Seq(5, 6, 5, 4))
+      solver.findPossibleSolutions(puzzle).map(paths => gridPathsToWords(grid, paths)) must containTheSameElementsAs(Seq(
+        Seq("pasta", "hotdog", "rites", "bask"),
+        Seq("pasta", "hotdog", "steak", "ribs"), // actual solution
+        Seq("pasta", "hotdog", "stirk", "base"),
+        Seq("pasta", "hotdog", "stirk", "sabe"),
+        Seq("stork", "pastis", "adobe", "gath"),
+        Seq("stork", "pastis", "adobe", "ghat"),
       ))
     }
     "find nothing when there are no possible words" in {
@@ -191,6 +210,17 @@ class PuzzleSolverSpec extends Specification{
       solver.findGridPathsStartingWithCoordinates(grid, Coordinates(4, 3), 7).map(grid.wordAt) must containTheSameElementsAs(Seq(
         "bicycle"
       ))
+      "return the correct paths for a grid with empty letters" in {
+        val grid = Grid.fromString(
+          """___s
+            |__bk
+            |__ar
+            |__ie
+            |__ts""".stripMargin)
+        solver.findGridPathsStartingWithCoordinates(grid, Coordinates(5, 4), 5).map(grid.wordAt) must containTheSameElementsAs(Seq(
+          "seria", "stirk", "steak"
+        ))
+      }
     }
   }
 
