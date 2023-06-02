@@ -3,32 +3,24 @@ package com.wordbrainsolver.application
 class PuzzleSolver(dictionary: Seq[String]) {
 
   def findPossibleSolutions(puzzle: Puzzle): Seq[Seq[GridPathAndWord]] = {
-    val possiblePaths: Seq[PossiblePaths] = findPossibleGridPaths(puzzle.grid, puzzle.wordLengths)
-    possiblePaths.flatMap(_.getGridPaths).map { gridPaths: Seq[GridPath] =>
-      gridPaths.zip(gridPathsToWords(puzzle.grid, gridPaths)).map { case (gridPath, word) =>
-        GridPathAndWord(gridPath, word)
-      }
-    }
+    val possiblePaths: Seq[PossiblePathsAndWords] = findPossibleGridPathsAndWords(puzzle.grid, puzzle.wordLengths)
+    possiblePaths.flatMap(_.getGridPathsAndWords)
   }
 
-  private def gridPathsToWords(grid: Grid, gridPaths: Seq[GridPath]): Seq[String] = {
-    gridPaths.headOption.map { firstPath =>
-      Seq(grid.wordAt(firstPath)) ++ gridPathsToWords(grid.withWordRemoved(firstPath), gridPaths.tail)
-    }.getOrElse(Nil)
-  }
-
-  private def findPossibleGridPaths(grid: Grid, wordLengths: Seq[Int]): Seq[PossiblePaths] = {
+  private def findPossibleGridPathsAndWords(grid: Grid, wordLengths: Seq[Int]): Seq[PossiblePathsAndWords] = {
     // Find paths for this word length which would leave enough contiguous letters for the next word (if there is one)
-    val gridPaths: Seq[GridPath] = findGridPathsLeavingNextWordFindable(grid, wordLengths.head, wordLengths.tail.headOption)
+    val pathsAndWords = findGridPathsLeavingNextWordFindable(grid, wordLengths.head, wordLengths.tail.headOption).map { path =>
+      GridPathAndWord(path, grid.wordAt(path))
+    }
     if (wordLengths.length > 1) {
       // For each path for this word, recursively find paths for the next word, stopping if there are none
-      gridPaths.flatMap { gridPath =>
-        val remainingGridPaths: Seq[PossiblePaths] = findPossibleGridPaths(grid.withWordRemoved(gridPath), wordLengths.tail)
-        if (remainingGridPaths.nonEmpty) Some(PossiblePaths(gridPath, remainingGridPaths)) else None
+      pathsAndWords.flatMap { pathAndWord =>
+        val remainingPathsAndWords = findPossibleGridPathsAndWords(grid.withWordRemoved(pathAndWord.gridPath), wordLengths.tail)
+        if (remainingPathsAndWords.nonEmpty) Some(PossiblePathsAndWords(pathAndWord, remainingPathsAndWords)) else None
       }
     } else {
-      // This is the last word - return its paths
-      gridPaths.map(gridPath => PossiblePaths(gridPath, Nil))
+      // This is the last word to find - return the possible paths and words
+      pathsAndWords.map(pathAndWord => PossiblePathsAndWords(pathAndWord, Nil))
     }
   }
 
