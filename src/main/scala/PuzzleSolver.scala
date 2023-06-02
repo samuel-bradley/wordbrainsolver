@@ -2,9 +2,19 @@ package com.wordbrainsolver.application
 
 class PuzzleSolver(dictionary: Seq[String]) {
 
-  def findPossibleSolutions(puzzle: Puzzle): Seq[Seq[GridPath]] = {
-    val possiblePaths = findPossibleGridPaths(puzzle.grid, puzzle.wordLengths)
-    possiblePaths.flatMap(_.getGridPaths)
+  def findPossibleSolutions(puzzle: Puzzle): Seq[Seq[GridPathAndWord]] = {
+    val possiblePaths: Seq[PossiblePaths] = findPossibleGridPaths(puzzle.grid, puzzle.wordLengths)
+    possiblePaths.flatMap(_.getGridPaths).map { gridPaths: Seq[GridPath] =>
+      gridPaths.zip(gridPathsToWords(puzzle.grid, gridPaths)).map { case (gridPath, word) =>
+        GridPathAndWord(gridPath, word)
+      }
+    }
+  }
+
+  private def gridPathsToWords(grid: Grid, gridPaths: Seq[GridPath]): Seq[String] = {
+    gridPaths.headOption.map { firstPath =>
+      Seq(grid.wordAt(firstPath)) ++ gridPathsToWords(grid.withWordRemoved(firstPath), gridPaths.tail)
+    }.getOrElse(Nil)
   }
 
   private def findPossibleGridPaths(grid: Grid, wordLengths: Seq[Int]): Seq[PossiblePaths] = {

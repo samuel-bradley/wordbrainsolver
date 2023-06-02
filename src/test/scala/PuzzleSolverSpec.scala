@@ -14,13 +14,24 @@ class PuzzleSolverSpec extends Specification{
   private val solver = new PuzzleSolver(dictionary)
 
   "Solving a puzzle" should {
+    "find the correct path and word for the smallest possible" in {
+      // This test asserts that the grid path matches the word - subsequent tests will just check the words for brevity
+      val grid = Grid.fromString(
+        """fi
+          |sh
+          |""".stripMargin)
+      val puzzle = Puzzle(grid, Seq(4))
+      solver.findPossibleSolutions(puzzle) mustEqual Seq(Seq(
+        GridPathAndWord(GridPath(Seq(Coordinates(1, 1), Coordinates(1, 2), Coordinates(2, 1), Coordinates(2, 2))), "fish")
+      ))
+    }
     "find the possible solutions for a small puzzle" in {
       val grid = Grid.fromString(
         """thk
           |etc
           |eba""".stripMargin)
       val puzzle = Puzzle(grid, Seq(4, 5))
-      solver.findPossibleSolutions(puzzle).map(paths => gridPathsToWords(grid, paths)) mustEqual Seq(
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Seq(
         Seq("tack", "thebe"),
         Seq("tack", "thebe"),
         Seq("back", "teeth"), // actual solution
@@ -33,7 +44,7 @@ class PuzzleSolverSpec extends Specification{
           |lti
           |igh""".stripMargin)
       val puzzle = Puzzle(grid, Seq(9))
-      solver.findPossibleSolutions(puzzle).map(paths => gridPathsToWords(grid, paths)) mustEqual Seq(Seq("lightning"))
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Seq(Seq("lightning"))
     }
     "find the possible solutions for a non-square grid" in {
       val grid = Grid.fromString(
@@ -42,7 +53,7 @@ class PuzzleSolverSpec extends Specification{
           |aic
           |cyb""".stripMargin)
       val puzzle = Puzzle(grid, Seq(7, 5))
-      solver.findPossibleSolutions(puzzle).map(paths => gridPathsToWords(grid, paths)) mustEqual Seq(
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Seq(
         Seq("bicycle", "yacht")
       )
     }
@@ -53,7 +64,7 @@ class PuzzleSolverSpec extends Specification{
           |ufo
           |abm""".stripMargin)
       val puzzle = Puzzle(grid, Seq(4, 4, 4))
-      solver.findPossibleSolutions(puzzle).map(paths => gridPathsToWords(grid, paths)) must containTheSameElementsAs(Seq(
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
         Seq("fuse", "bosh", "alms"),
         Seq("bush", "leaf", "moss"),
         Seq("bush", "flea", "moss"),
@@ -73,7 +84,7 @@ class PuzzleSolverSpec extends Specification{
           |atoe
           |phts""".stripMargin)
       val puzzle = Puzzle(grid, Seq(5, 6, 5, 4))
-      solver.findPossibleSolutions(puzzle).map(paths => gridPathsToWords(grid, paths)) must containTheSameElementsAs(Seq(
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
         Seq("pasta", "hotdog", "rites", "bask"),
         Seq("pasta", "hotdog", "steak", "ribs"), // actual solution
         Seq("pasta", "hotdog", "stirk", "base"),
@@ -88,7 +99,7 @@ class PuzzleSolverSpec extends Specification{
           |xxx
           |xxx""".stripMargin)
       val puzzle = Puzzle(grid, Seq(3, 6))
-      solver.findPossibleSolutions(puzzle).map(paths => gridPathsToWords(grid, paths)) mustEqual Seq()
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Seq()
     }
   }
 
@@ -239,10 +250,6 @@ class PuzzleSolverSpec extends Specification{
     }
   }
 
-  private def gridPathsToWords(grid: Grid, gridPaths: Seq[GridPath]): Seq[String] = {
-    gridPaths.headOption.map { firstPath =>
-      Seq(grid.wordAt(firstPath)) ++ gridPathsToWords(grid.withWordRemoved(firstPath), gridPaths.tail)
-    }.getOrElse(Nil)
-  }
+
 
 }
