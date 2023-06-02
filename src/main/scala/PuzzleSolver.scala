@@ -7,16 +7,6 @@ class PuzzleSolver(dictionary: Seq[String]) {
     possiblePaths.flatMap(_.getGridPaths)
   }
 
-  case class PossiblePaths(gridPath: GridPath, nextGridPaths: Seq[PossiblePaths]) {
-    def getGridPaths: Seq[Seq[GridPath]] = {
-      if (nextGridPaths.isEmpty) Seq(Seq(gridPath)) else {
-        nextGridPaths.flatMap { possiblePaths: PossiblePaths =>
-          possiblePaths.getGridPaths.map(words => Seq(gridPath) ++ words)
-        }
-      }
-    }
-  }
-
   private def findPossibleGridPaths(grid: Grid, wordLengths: Seq[Int]): Seq[PossiblePaths] = {
     // Find paths for this word length which would leave enough contiguous letters for the next word (if there is one)
     val gridPaths: Seq[GridPath] = findGridPathsLeavingNextWordFindable(grid, wordLengths.head, wordLengths.tail.headOption)
