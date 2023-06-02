@@ -60,56 +60,56 @@ class GridSpec extends Specification {
     }
   }
 
-  "retrieving the letter at a particular row and column" should {
+  "retrieving the letter at a particular cell" should {
     val grid: Grid = Grid.fromString(
       """a_c
         |def
         |ghi""".stripMargin
     )
     "return a letter from the top-left corner" in {
-      grid.letterAt(Coordinates(1, 1)) must beSome('a')
+      grid.letterAt(Cell(1, 1)) must beSome('a')
     }
     "return a letter from the middle of the grid" in {
-      grid.letterAt(Coordinates(2, 2)) must beSome('e')
+      grid.letterAt(Cell(2, 2)) must beSome('e')
     }
     "return a letter from the bottom-right corner" in {
-      grid.letterAt(Coordinates(3, 3)) must beSome('i')
+      grid.letterAt(Cell(3, 3)) must beSome('i')
     }
     "return None for an empty cell" in {
-      grid.letterAt(Coordinates(1, 2)) must beNone
+      grid.letterAt(Cell(1, 2)) must beNone
     }
     "throw an IndexOutOfBoundsException for a row and column outside the grid" in {
-      grid.letterAt(Coordinates(100, 100)) must throwAn[IndexOutOfBoundsException]
+      grid.letterAt(Cell(100, 100)) must throwAn[IndexOutOfBoundsException]
     }
   }
 
-  "retrieving the coordinates of all neighbouring non-blank letters" should {
+  "retrieving the cells of all neighbouring non-blank letters" should {
     val grid: Grid = Grid.fromString(
       """ab_
         |def
         |ghi""".stripMargin
     )
-    "return just rightward and downward coordinates for the top-left corner" in {
-      grid.nonEmptyNeighbouringCoordinates(Coordinates(1, 1)) must containTheSameElementsAs(Seq(
-        Coordinates(1, 2),
-        Coordinates(2, 1), Coordinates(2, 2)
+    "return just rightward and downward cells for the top-left corner" in {
+      grid.nonEmptyNeighbouringCells(Cell(1, 1)) must containTheSameElementsAs(Seq(
+        Cell(1, 2),
+        Cell(2, 1), Cell(2, 2)
       ))
     }
-    "return the full set of coordinates for a letter in the middle of the grid, ignoring blanks" in {
-      grid.nonEmptyNeighbouringCoordinates(Coordinates(2, 2)) must containTheSameElementsAs(Seq(
-        Coordinates(1, 1), Coordinates(1, 2),
-        Coordinates(2, 1), Coordinates(2, 3),
-        Coordinates(3, 1), Coordinates(3, 2), Coordinates(3, 3)
+    "return the full set of cells for a letter in the middle of the grid, ignoring blanks" in {
+      grid.nonEmptyNeighbouringCells(Cell(2, 2)) must containTheSameElementsAs(Seq(
+        Cell(1, 1), Cell(1, 2),
+        Cell(2, 1), Cell(2, 3),
+        Cell(3, 1), Cell(3, 2), Cell(3, 3)
       ))
     }
-    "return just the leftward and upward coordinates for the bottom-right corner" in {
-      grid.nonEmptyNeighbouringCoordinates(Coordinates(3, 3)) must containTheSameElementsAs(Seq(
-        Coordinates(2, 2), Coordinates(2, 3),
-        Coordinates(3, 2)
+    "return just the leftward and upward cells for the bottom-right corner" in {
+      grid.nonEmptyNeighbouringCells(Cell(3, 3)) must containTheSameElementsAs(Seq(
+        Cell(2, 2), Cell(2, 3),
+        Cell(3, 2)
       ))
     }
     "throw an IllegalArgumentException for a row and column outside the grid" in {
-      grid.nonEmptyNeighbouringCoordinates(Coordinates(100, 100)) must throwAn[IllegalArgumentException]
+      grid.nonEmptyNeighbouringCells(Cell(100, 100)) must throwAn[IllegalArgumentException]
     }
   }
 
@@ -120,7 +120,7 @@ class GridSpec extends Specification {
           |fghij
           |klmno""".stripMargin)
       // Word is "chin":
-      grid.withWordRemoved(GridPath(Seq(Coordinates(1, 3), Coordinates(2, 3), Coordinates(2, 4), Coordinates(3, 4)))) mustEqual Grid.fromString(
+      grid.withWordRemoved(GridPath(Seq(Cell(1, 3), Cell(2, 3), Cell(2, 4), Cell(3, 4)))) mustEqual Grid.fromString(
         """ab__e
           |fg__j
           |klmdo""".stripMargin)
@@ -144,24 +144,24 @@ class GridSpec extends Specification {
     }
   }
 
-  "getting the coordinates of non-empty letters in the grid" should {
-    "return only the coordinates of non-empty letters" in {
+  "getting the cells of non-empty letters in the grid" should {
+    "return only the cells of non-empty letters" in {
       val grid: Grid = Grid.fromString(
         """_b_
           |_ef
           |_hi""".stripMargin)
-      grid.nonEmptyCoordinates() must containTheSameElementsAs(Seq(Coordinates(1, 2), Coordinates(2, 2), Coordinates(3, 2), Coordinates(2, 3), Coordinates(3, 3)))
+      grid.nonEmptyCells() must containTheSameElementsAs(Seq(Cell(1, 2), Cell(2, 2), Cell(3, 2), Cell(2, 3), Cell(3, 3)))
     }
-    "return the coordinates of non-empty letters in a non-square grid" in {
+    "return the cells of non-empty letters in a non-square grid" in {
       val grid: Grid = Grid.fromString(
         """___
           |t__
           |hy_
           |ac_""".stripMargin)
-      grid.nonEmptyCoordinates() must containTheSameElementsAs(Seq(
-        Coordinates(2, 1),
-        Coordinates(3, 1), Coordinates(3, 2),
-        Coordinates(4, 1), Coordinates(4, 2)
+      grid.nonEmptyCells() must containTheSameElementsAs(Seq(
+        Cell(2, 1),
+        Cell(3, 1), Cell(3, 2),
+        Cell(4, 1), Cell(4, 2)
       ))
     }
   }

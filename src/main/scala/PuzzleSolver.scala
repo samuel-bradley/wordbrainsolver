@@ -42,26 +42,26 @@ class PuzzleSolver(dictionary: Seq[String]) {
   }
 
   def findGridPathsStartingAnywhere(grid: Grid, wordLength: Int): Seq[GridPath] = {
-    grid.nonEmptyCoordinates().flatMap(c => findGridPathsStartingWithCoordinates(grid, c, wordLength))
+    grid.nonEmptyCells().flatMap(c => findGridPathsStartingAtCell(grid, c, wordLength))
   }
 
-  def findGridPathsStartingWithCoordinates(grid: Grid, coordinates: Coordinates, wordLength: Int): Seq[GridPath] = {
-    findGridPathsStartingWithPartialPaths(grid, Seq(GridPath(Seq(coordinates))), wordLength)
+  def findGridPathsStartingAtCell(grid: Grid, cell: Cell, wordLength: Int): Seq[GridPath] = {
+    findGridPathsStartingWithPartialPaths(grid, Seq(GridPath(Seq(cell))), wordLength)
   }
 
   private def findGridPathsStartingWithPartialPaths(grid: Grid, pathsSoFar: Seq[GridPath], wordLength: Int): Seq[GridPath] = {
     pathsSoFar.flatMap { pathSoFar =>
-      if (pathSoFar.coordinates.length == wordLength) Seq(pathSoFar) else {
-        // Extend each path so far by each of its possible next coordinates
-        val newPathsSoFar = findPossibleNextCoordinatesForGridPath(grid, pathSoFar, wordLength).map(pathSoFar.add)
+      if (pathSoFar.cells.length == wordLength) Seq(pathSoFar) else {
+        // Extend each path so far by each of its possible next cells
+        val newPathsSoFar = findPossibleNextCellsForGridPath(grid, pathSoFar, wordLength).map(pathSoFar.add)
         findGridPathsStartingWithPartialPaths(grid, newPathsSoFar, wordLength)
       }
     }
   }
 
-  def findPossibleNextCoordinatesForGridPath(grid: Grid, gridPathSoFar: GridPath, wordLength: Int): Seq[Coordinates] = {
-    grid.nonEmptyNeighbouringCoordinates(gridPathSoFar.coordinates.last)
-      .filterNot(gridPathSoFar.coordinates.contains) // exclude already-visited coordinates
+  def findPossibleNextCellsForGridPath(grid: Grid, gridPathSoFar: GridPath, wordLength: Int): Seq[Cell] = {
+    grid.nonEmptyNeighbouringCells(gridPathSoFar.cells.last)
+      .filterNot(gridPathSoFar.cells.contains) // exclude already-visited cells
       .filter { neighbour =>
         val putativeWordSoFar = grid.wordAt(gridPathSoFar) + grid.letterAt(neighbour).getOrElse("")
         dictionary.exists(word => word.startsWith(putativeWordSoFar) && word.length == wordLength)

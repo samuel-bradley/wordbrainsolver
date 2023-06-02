@@ -22,7 +22,7 @@ class PuzzleSolverSpec extends Specification{
           |""".stripMargin)
       val puzzle = Puzzle(grid, Seq(4))
       solver.findPossibleSolutions(puzzle) mustEqual Seq(Seq(
-        GridPathAndWord(GridPath(Seq(Coordinates(1, 1), Coordinates(1, 2), Coordinates(2, 1), Coordinates(2, 2))), "fish")
+        GridPathAndWord(GridPath(Seq(Cell(1, 1), Cell(1, 2), Cell(2, 1), Cell(2, 2))), "fish")
       ))
     }
     "find the possible solutions for a small puzzle" in {
@@ -109,7 +109,7 @@ class PuzzleSolverSpec extends Specification{
         |etc
         |eba""".stripMargin)
     solver.findGridPathsLeavingNextWordFindable(grid, 4, Some(5)).map { path: GridPath =>
-      path.coordinates.map(grid.letterAt(_).getOrElse("")).mkString
+      path.cells.map(grid.letterAt(_).getOrElse("")).mkString
     } must containTheSameElementsAs(Seq( // same as below, but missing one "bath" and two "beth"s
       "abet",
       "abet",
@@ -188,28 +188,28 @@ class PuzzleSolverSpec extends Specification{
     }
   }
 
-  "Finding possible paths for a word starting at a given letter" should {
+  "Finding possible paths for a word starting at a given cell" should {
     "return the correct paths" in {
       val grid = Grid.fromString(
         """thk
           |etc
           |eba""".stripMargin)
-      solver.findGridPathsStartingWithCoordinates(grid, Coordinates(3, 2), 4) must containTheSameElementsAs(Seq(
-        GridPath(Seq(Coordinates(3, 2), Coordinates(3, 3), Coordinates(2, 3), Coordinates(1, 2))), // bach
-        GridPath(Seq(Coordinates(3, 2), Coordinates(3, 3), Coordinates(2, 3), Coordinates(1, 3))), // back
-        GridPath(Seq(Coordinates(3, 2), Coordinates(3, 3), Coordinates(2, 2), Coordinates(2, 1))), // bate
-        GridPath(Seq(Coordinates(3, 2), Coordinates(3, 3), Coordinates(2, 2), Coordinates(3, 1))), // bate
-        GridPath(Seq(Coordinates(3, 2), Coordinates(3, 3), Coordinates(2, 2), Coordinates(1, 2))), // bath
-        GridPath(Seq(Coordinates(3, 2), Coordinates(2, 1), Coordinates(3, 1), Coordinates(2, 2))), // beet
-        GridPath(Seq(Coordinates(3, 2), Coordinates(3, 1), Coordinates(2, 1), Coordinates(1, 1))), // beet
-        GridPath(Seq(Coordinates(3, 2), Coordinates(3, 1), Coordinates(2, 1), Coordinates(2, 2))), // beet
-        GridPath(Seq(Coordinates(3, 2), Coordinates(2, 1), Coordinates(2, 2), Coordinates(3, 3))), // beta
-        GridPath(Seq(Coordinates(3, 2), Coordinates(3, 1), Coordinates(2, 2), Coordinates(3, 3))), // beta
-        GridPath(Seq(Coordinates(3, 2), Coordinates(2, 1), Coordinates(2, 2), Coordinates(3, 1))), // bete
-        GridPath(Seq(Coordinates(3, 2), Coordinates(2, 1), Coordinates(1, 1), Coordinates(1, 2))), // beth
-        GridPath(Seq(Coordinates(3, 2), Coordinates(2, 1), Coordinates(2, 2), Coordinates(1, 2))), // beth
-        GridPath(Seq(Coordinates(3, 2), Coordinates(3, 1), Coordinates(2, 2), Coordinates(1, 2))), // beth
-        GridPath(Seq(Coordinates(3, 2), Coordinates(3, 1), Coordinates(2, 2), Coordinates(2, 1))), // bett
+      solver.findGridPathsStartingAtCell(grid, Cell(3, 2), 4) must containTheSameElementsAs(Seq(
+        GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 3), Cell(1, 2))), // bach
+        GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 3), Cell(1, 3))), // back
+        GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 2), Cell(2, 1))), // bate
+        GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 2), Cell(3, 1))), // bate
+        GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 2), Cell(1, 2))), // bath
+        GridPath(Seq(Cell(3, 2), Cell(2, 1), Cell(3, 1), Cell(2, 2))), // beet
+        GridPath(Seq(Cell(3, 2), Cell(3, 1), Cell(2, 1), Cell(1, 1))), // beet
+        GridPath(Seq(Cell(3, 2), Cell(3, 1), Cell(2, 1), Cell(2, 2))), // beet
+        GridPath(Seq(Cell(3, 2), Cell(2, 1), Cell(2, 2), Cell(3, 3))), // beta
+        GridPath(Seq(Cell(3, 2), Cell(3, 1), Cell(2, 2), Cell(3, 3))), // beta
+        GridPath(Seq(Cell(3, 2), Cell(2, 1), Cell(2, 2), Cell(3, 1))), // bete
+        GridPath(Seq(Cell(3, 2), Cell(2, 1), Cell(1, 1), Cell(1, 2))), // beth
+        GridPath(Seq(Cell(3, 2), Cell(2, 1), Cell(2, 2), Cell(1, 2))), // beth
+        GridPath(Seq(Cell(3, 2), Cell(3, 1), Cell(2, 2), Cell(1, 2))), // beth
+        GridPath(Seq(Cell(3, 2), Cell(3, 1), Cell(2, 2), Cell(2, 1))), // bett
       ))
     }
     "return the correct paths for a non-square grid" in {
@@ -218,7 +218,7 @@ class PuzzleSolverSpec extends Specification{
           |hcl
           |aic
           |cyb""".stripMargin)
-      solver.findGridPathsStartingWithCoordinates(grid, Coordinates(4, 3), 7).map(grid.wordAt) must containTheSameElementsAs(Seq(
+      solver.findGridPathsStartingAtCell(grid, Cell(4, 3), 7).map(grid.wordAt) must containTheSameElementsAs(Seq(
         "bicycle"
       ))
       "return the correct paths for a grid with empty letters" in {
@@ -228,24 +228,24 @@ class PuzzleSolverSpec extends Specification{
             |__ar
             |__ie
             |__ts""".stripMargin)
-        solver.findGridPathsStartingWithCoordinates(grid, Coordinates(5, 4), 5).map(grid.wordAt) must containTheSameElementsAs(Seq(
+        solver.findGridPathsStartingAtCell(grid, Cell(5, 4), 5).map(grid.wordAt) must containTheSameElementsAs(Seq(
           "seria", "stirk", "steak"
         ))
       }
     }
   }
 
-  "Finding possible next coordinates in an unknown word of a given length" should {
-    "return the correct coordinates" in {
+  "Finding possible next cells in an unknown word of a given length" should {
+    "return the correct cells" in {
       val grid = Grid.fromString(
         """thk
           |etc
           |eba""".stripMargin)
-      val gridPath = GridPath(Seq(Coordinates(3, 2))) // b...
-      solver.findPossibleNextCoordinatesForGridPath(grid, gridPath, 4) must containTheSameElementsAs(Seq(
-        Coordinates(2, 1), // be...
-        Coordinates(3, 1), // be...
-        Coordinates(3, 3) // ba...
+      val gridPath = GridPath(Seq(Cell(3, 2))) // b...
+      solver.findPossibleNextCellsForGridPath(grid, gridPath, 4) must containTheSameElementsAs(Seq(
+        Cell(2, 1), // be...
+        Cell(3, 1), // be...
+        Cell(3, 3) // ba...
       ))
     }
   }

@@ -1,7 +1,7 @@
 package com.wordbrainsolver.application
 
-case class GridPath(coordinates: Seq[Coordinates]) {
-  def add(newCoordinates: Coordinates): GridPath = copy(coordinates :+ newCoordinates)
+case class GridPath(cells: Seq[Cell]) {
+  def add(newCell: Cell): GridPath = copy(cells :+ newCell)
 }
 
 case class GridPathAndWord(gridPath: GridPath, word: String)

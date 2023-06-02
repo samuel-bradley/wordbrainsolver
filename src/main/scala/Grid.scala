@@ -6,27 +6,27 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
 
   private val height: Int = letters.length / width
 
-  def letterAt(coordinates: Coordinates): Option[Char] = {
-    letters((coordinates.row - 1) * width + coordinates.col - 1)
+  def letterAt(cell: Cell): Option[Char] = {
+    letters((cell.row - 1) * width + cell.col - 1)
   }
 
   def wordAt(gridPath: GridPath): String = {
-    gridPath.coordinates.flatMap(letterAt).mkString
+    gridPath.cells.flatMap(letterAt).mkString
   }
 
-  def nonEmptyNeighbouringCoordinates(coordinates: Coordinates): Seq[Coordinates] = {
-    if (coordinates.row > height || coordinates.col > width)
-      throw new IllegalArgumentException(s"Cannot get neighbours for $coordinates outside grid of ($width, $height)")
+  def nonEmptyNeighbouringCells(cell: Cell): Seq[Cell] = {
+    if (cell.row > height || cell.col > width)
+      throw new IllegalArgumentException(s"Cannot get neighbours for $cell outside grid of ($width, $height)")
 
     (for (rowOffset <- -1 to 1; colOffset <- -1 to 1 if !(rowOffset == 0 && colOffset == 0)) yield (rowOffset, colOffset))
-      .map { case (rowOffset, colOffset) => Coordinates(coordinates.row + rowOffset, coordinates.col + colOffset) }
-      .filter(coordinates => coordinatesAreInGrid(coordinates) && letterAt(coordinates).isDefined)
+      .map { case (rowOffset, colOffset) => Cell(cell.row + rowOffset, cell.col + colOffset) }
+      .filter(cell => cellIsInGrid(cell) && letterAt(cell).isDefined)
   }
 
   def withWordRemoved(gridPath: GridPath): Grid = {
-    def indexToCoordinates(index: Int): Coordinates = Coordinates(index / width + 1, index % width + 1)
+    def indexToCell(index: Int): Cell = Cell(index / width + 1, index % width + 1)
     val lettersWithNewEmpties: Seq[Option[Char]] = letters.zipWithIndex.map { case (letter: Option[Char], index: Int) =>
-        if (gridPath.coordinates.contains(indexToCoordinates(index))) None
+        if (gridPath.cells.contains(indexToCell(index))) None
         else letter
     }
     Grid(collapseLetters(lettersWithNewEmpties), width)
@@ -36,9 +36,9 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
     findLetterIslandSizes().exists(_ >= wordLength)
   }
 
-  def nonEmptyCoordinates(): Seq[Coordinates] = {
-    (for (row <- 1 to height; col <- 1 to width) yield Coordinates(row, col)).flatMap { coordinates =>
-      if (letterAt(coordinates).isDefined) Some(coordinates) else None
+  def nonEmptyCells(): Seq[Cell] = {
+    (for (row <- 1 to height; col <- 1 to width) yield Cell(row, col)).flatMap { cell =>
+      if (letterAt(cell).isDefined) Some(cell) else None
     }
   }
 
@@ -66,9 +66,8 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
     (1 to height).flatMap(row => collapsedColumns.map(column => column(row - 1)))
   }
 
-  private def coordinatesAreInGrid(coordinates: Coordinates): Boolean = {
-    coordinates.row >= 1 && coordinates.row <= height &&
-      coordinates.col >= 1 && coordinates.col <= width
+  private def cellIsInGrid(cell: Cell): Boolean = {
+    cell.row >= 1 && cell.row <= height && cell.col >= 1 && cell.col <= width
   }
 
   private def lettersContainEmptyGaps(): Boolean = {
