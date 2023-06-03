@@ -20,7 +20,7 @@ class PuzzleSolverSpec extends Specification{
         """fi
           |sh
           |""".stripMargin)
-      val puzzle = Puzzle(grid, Seq(4))
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(4)))
       solver.findPossibleSolutions(puzzle) mustEqual Seq(Seq(
         GridPathAndWord(GridPath(Seq(Cell(1, 1), Cell(1, 2), Cell(2, 1), Cell(2, 2))), "fish")
       ))
@@ -30,7 +30,7 @@ class PuzzleSolverSpec extends Specification{
         """thk
           |etc
           |eba""".stripMargin)
-      val puzzle = Puzzle(grid, Seq(4, 5))
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(4, 5)))
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Seq(
         Seq("tack", "thebe"),
         Seq("tack", "thebe"),
@@ -43,7 +43,7 @@ class PuzzleSolverSpec extends Specification{
         """gnn
           |lti
           |igh""".stripMargin)
-      val puzzle = Puzzle(grid, Seq(9))
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(9)))
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Seq(Seq("lightning"))
     }
     "find the possible solutions for a non-square grid" in {
@@ -52,7 +52,7 @@ class PuzzleSolverSpec extends Specification{
           |hcl
           |aic
           |cyb""".stripMargin)
-      val puzzle = Puzzle(grid, Seq(7, 5))
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(7, 5)))
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Seq(
         Seq("bicycle", "yacht")
       )
@@ -63,7 +63,7 @@ class PuzzleSolverSpec extends Specification{
           |sls
           |ufo
           |abm""".stripMargin)
-      val puzzle = Puzzle(grid, Seq(4, 4, 4))
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(4, 4, 4)))
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
         Seq("fuse", "bosh", "alms"),
         Seq("bush", "leaf", "moss"),
@@ -76,6 +76,39 @@ class PuzzleSolverSpec extends Specification{
         Seq("moss", "bush", "flea")
       ))
     }
+    "find the possible solutions matching revealed letters" in {
+      val grid = Grid.fromString(
+        """ehs
+          |sls
+          |ufo
+          |abm""".stripMargin)
+      val puzzle = Puzzle(grid, Seq(WordToFind(4, "bu"), WordToFind(4, "m"), WordToFind(4, "")))
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
+        Seq("bush", "moss", "leaf"), // actual solution
+        Seq("bush", "moss", "flea")
+      ))
+    }
+    "find the possible solutions when the last word is revealed" in {
+      val grid = Grid.fromString(
+        """ehs
+          |sls
+          |ufo
+          |abm""".stripMargin)
+      val puzzle = Puzzle(grid, Seq(WordToFind(4, ""), WordToFind(4, ""), WordToFind(4, "leaf")))
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
+        Seq("bush", "moss", "leaf"), // actual solution
+        Seq("moss", "bush", "leaf")
+      ))
+    }
+    "find no solutions when a revealed letter matches no words" in {
+      val grid = Grid.fromString(
+        """ehs
+          |sls
+          |ufo
+          |abm""".stripMargin)
+      val puzzle = Puzzle(grid, Seq(WordToFind(4, ""), WordToFind(4, ""), WordToFind(4, "o")))
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Nil
+    }
     "find the possible solutions for a five-by-four grid with four words" in {
       val grid = Grid.fromString(
         """agbs
@@ -83,7 +116,7 @@ class PuzzleSolverSpec extends Specification{
           |sdir
           |atoe
           |phts""".stripMargin)
-      val puzzle = Puzzle(grid, Seq(5, 6, 5, 4))
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(5, 6, 5, 4)))
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
         Seq("pasta", "hotdog", "rites", "bask"),
         Seq("pasta", "hotdog", "steak", "ribs"), // actual solution
@@ -98,7 +131,7 @@ class PuzzleSolverSpec extends Specification{
         """xxx
           |xxx
           |xxx""".stripMargin)
-      val puzzle = Puzzle(grid, Seq(3, 6))
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(3, 6)))
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Seq()
     }
   }
@@ -108,7 +141,7 @@ class PuzzleSolverSpec extends Specification{
       """thk
         |etc
         |eba""".stripMargin)
-    solver.findGridPathsLeavingNextWordFindable(grid, 4, Some(5)).map { path: GridPath =>
+    solver.findGridPathsLeavingNextWordFindable(grid, WordToFind(4, ""), Some(5)).map { path: GridPath =>
       path.cells.map(grid.letterAt(_).getOrElse("")).mkString
     } must containTheSameElementsAs(Seq( // same as below, but missing one "bath" and two "beth"s
       "abet",
@@ -145,7 +178,7 @@ class PuzzleSolverSpec extends Specification{
         """thk
           |etc
           |eba""".stripMargin)
-      solver.findGridPathsStartingAnywhere(grid, 4).map(grid.wordAt) must containTheSameElementsAs(Seq(
+      solver.findGridPathsStartingAnywhere(grid, WordToFind(4, "")).map(grid.wordAt) must containTheSameElementsAs(Seq(
         "abet",
         "abet",
         "abet",
@@ -182,7 +215,7 @@ class PuzzleSolverSpec extends Specification{
           |hcl
           |aic
           |cyb""".stripMargin)
-      solver.findGridPathsStartingAnywhere(grid, 7).map(grid.wordAt) must containTheSameElementsAs(Seq(
+      solver.findGridPathsStartingAnywhere(grid, WordToFind(7, "")).map(grid.wordAt) must containTheSameElementsAs(Seq(
         "acyclic", "bicycle"
       ))
     }
@@ -194,7 +227,7 @@ class PuzzleSolverSpec extends Specification{
         """thk
           |etc
           |eba""".stripMargin)
-      solver.findGridPathsStartingAtCell(grid, Cell(3, 2), 4) must containTheSameElementsAs(Seq(
+      solver.findGridPathsStartingAtCell(grid, Cell(3, 2), WordToFind(4, "")) must containTheSameElementsAs(Seq(
         GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 3), Cell(1, 2))), // bach
         GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 3), Cell(1, 3))), // back
         GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 2), Cell(2, 1))), // bate
@@ -218,7 +251,7 @@ class PuzzleSolverSpec extends Specification{
           |hcl
           |aic
           |cyb""".stripMargin)
-      solver.findGridPathsStartingAtCell(grid, Cell(4, 3), 7).map(grid.wordAt) must containTheSameElementsAs(Seq(
+      solver.findGridPathsStartingAtCell(grid, Cell(4, 3), WordToFind(7, "")).map(grid.wordAt) must containTheSameElementsAs(Seq(
         "bicycle"
       ))
       "return the correct paths for a grid with empty letters" in {
@@ -228,7 +261,7 @@ class PuzzleSolverSpec extends Specification{
             |__ar
             |__ie
             |__ts""".stripMargin)
-        solver.findGridPathsStartingAtCell(grid, Cell(5, 4), 5).map(grid.wordAt) must containTheSameElementsAs(Seq(
+        solver.findGridPathsStartingAtCell(grid, Cell(5, 4), WordToFind(5, "")).map(grid.wordAt) must containTheSameElementsAs(Seq(
           "seria", "stirk", "steak"
         ))
       }
@@ -242,7 +275,7 @@ class PuzzleSolverSpec extends Specification{
           |etc
           |eba""".stripMargin)
       val gridPath = GridPath(Seq(Cell(3, 2))) // b...
-      solver.findPossibleNextCellsForGridPath(grid, gridPath, 4) must containTheSameElementsAs(Seq(
+      solver.findPossibleNextCellsForGridPath(grid, gridPath, WordToFind(4, "")) must containTheSameElementsAs(Seq(
         Cell(2, 1), // be...
         Cell(3, 1), // be...
         Cell(3, 3) // ba...
@@ -250,6 +283,6 @@ class PuzzleSolverSpec extends Specification{
     }
   }
 
-
+  private def unrevealedWords(lengths: Seq[Int]): Seq[WordToFind] = lengths.map(WordToFind(_, ""))
 
 }
