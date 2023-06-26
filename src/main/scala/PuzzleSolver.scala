@@ -1,6 +1,6 @@
 package com.wordbrainsolver.application
 
-class PuzzleSolver(dictionary: Seq[String]) {
+class PuzzleSolver(dictionary: Dictionary) {
 
   def findPossibleSolutions(puzzle: Puzzle): Seq[Seq[GridPathAndWord]] = {
     val possiblePaths: Seq[PossiblePathsAndWords] = findPossibleGridPathsAndWords(puzzle.grid, puzzle.wordsToFind)
@@ -56,9 +56,7 @@ class PuzzleSolver(dictionary: Seq[String]) {
       .filterNot(gridPathSoFar.cells.contains) // exclude already-visited cells
       .filter { neighbour =>
         val putativeWordSoFar = grid.wordAt(gridPathSoFar) + grid.letterAt(neighbour).getOrElse("")
-        dictionary.exists(word =>
-          word.startsWith(putativeWordSoFar) && word.startsWith(wordToFind.revealedPart) && word.length == wordToFind.length
-        )
+        dictionary.wordExists(putativeWordSoFar, wordToFind.revealedPart, wordToFind.length)
       }
   }
 

@@ -2,16 +2,14 @@ package com.wordbrainsolver.application
 
 import org.specs2.mutable.Specification
 
-import java.nio.file.{Files, Path}
-import scala.jdk.CollectionConverters.CollectionHasAsScala
+import java.nio.file.Path
 
 class PuzzleSolverSpec extends Specification{
 
   // https://www-personal.umich.edu/~jlawler/wordlist
   // TODO some words used in the game don't appear in the dictionary, so this file is obviously not sufficient
-  private val customWords = Seq("ribs", "barista")
-  private val dictionary = (Files.readAllLines(Path.of("C:\\Users\\Samuel\\Documents\\wordbrainsolver\\src\\main\\scala\\dictionary.txt"))
-    .asScala.toSeq ++ customWords).sorted
+  private val additionalWords = Seq("ribs", "barista")
+  private val dictionary = Dictionary.fromFile(Path.of("C:\\Users\\Samuel\\Documents\\wordbrainsolver\\src\\main\\scala\\dictionary.txt"), additionalWords)
   private val solver = new PuzzleSolver(dictionary)
 
   "Solving a puzzle" should {
