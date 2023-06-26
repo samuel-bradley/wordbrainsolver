@@ -8,9 +8,10 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 class PuzzleSolverSpec extends Specification{
 
   // https://www-personal.umich.edu/~jlawler/wordlist
-  // TODO it was necessary to add "ribs" to make a test pass, so this file is evidently not sufficient
+  // TODO some words used in the game don't appear in the dictionary, so this file is obviously not sufficient
+  private val customWords = Seq("ribs", "barista")
   private val dictionary = (Files.readAllLines(Path.of("C:\\Users\\Samuel\\Documents\\wordbrainsolver\\src\\main\\scala\\dictionary.txt"))
-    .asScala.toSeq :+ "ribs").sorted
+    .asScala.toSeq ++ customWords).sorted
   private val solver = new PuzzleSolver(dictionary)
 
   "Solving a puzzle" should {
@@ -124,6 +125,43 @@ class PuzzleSolverSpec extends Specification{
         Seq("pasta", "hotdog", "stirk", "sabe"),
         Seq("stork", "pastis", "adobe", "gath"),
         Seq("stork", "pastis", "adobe", "ghat"),
+      ))
+    }
+    "find the possible solutions for a five-by-five grid with five words and many possible solutions" in {
+      val grid = Grid.fromString(
+        """kilrc
+          |rller
+          |asake
+          |guica
+          |fbmtm""".stripMargin)
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(5, 5, 4, 5, 6)))
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
+        Seq("kills", "creat", "guar", "flick", "membra"),
+        Seq("creat", "kills", "guar", "flick", "membra"),
+        Seq("cream", "sugar", "flak", "climb", "kilter"),
+        Seq("cream", "sugar", "milk", "black", "filter"),
+        Seq("cream", "sugar", "tick", "flamb", "killer"),
+        Seq("cream", "sugar", "tick", "flamb", "killer"),
+        Seq("sugar", "cream", "flak", "climb", "kilter"),
+        Seq("sugar", "cream", "milk", "black", "filter"), // actual solution
+        Seq("sugar", "cream", "tick", "flamb", "killer"),
+        Seq("sugar", "cream", "tick", "flamb", "killer"),
+        Seq("sugar", "flake", "cram", "climb", "kilter"),
+        Seq("sugar", "flake", "marc", "climb", "kilter"),
+        Seq("sugar", "flick", "lamb", "cream", "kilter")
+      ))
+    }
+    "find the possible solutions for another five-by-five grid with five words but fewer possible solutions" in {
+      val grid = Grid.fromString(
+        """atsoe
+          |isusj
+          |grrea
+          |uapsv
+          |mbpca""".stripMargin)
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(7, 4, 8, 3, 3)))
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
+        Seq("barista", "java", "espresso", "gum", "cup"),
+        Seq("barista", "java", "espresso", "mug", "cup") // actual solution
       ))
     }
     "find nothing when there are no possible words" in {
