@@ -2,6 +2,8 @@ package com.wordbrainsolver.application
 
 import scala.annotation.tailrec
 
+// https://medium.com/@AlirezaMeskin/implementing-immutable-trie-in-scala-c0ab58fd401
+
 trait TernarySearchTree[+A] {
   def insert[B >: A](key: String, value: B): TernarySearchTree[B] = TernarySearchTree.insert(this, key, value, 0)
 

@@ -2,6 +2,8 @@ package com.wordbrainsolver.application
 
 import scala.annotation.tailrec
 
+// https://medium.com/@AlirezaMeskin/implementing-immutable-trie-in-scala-c0ab58fd401
+
 case class Trie[V](value: Option[V], children: List[Option[Trie[V]]]) {
   def insert(key: String, value: V): Trie[V] = Trie.insert(this, key, value, 0)
 
