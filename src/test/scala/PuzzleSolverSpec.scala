@@ -10,7 +10,7 @@ class PuzzleSolverSpec extends Specification{
   // https://www-personal.umich.edu/~jlawler/wordlist
   // TODO some words used in the game don't appear in the dictionary, so this file is obviously not sufficient
   private val dictionaryPath = Path.of("C:\\Users\\Samuel\\Documents\\wordbrainsolver\\src\\main\\scala\\dictionary.txt")
-  private val additionalWords = Seq("ribs", "barista")
+  private val additionalWords = Seq("ribs", "barista", "multiverse")
   private val dictionary = new ListDictionary(Files.readAllLines(dictionaryPath).asScala.toSeq ++ additionalWords)
   private val solver = new PuzzleSolver(dictionaryPath, additionalWords)
 
@@ -162,6 +162,39 @@ class PuzzleSolverSpec extends Specification{
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
         Seq("barista", "java", "espresso", "gum", "cup"),
         Seq("barista", "java", "espresso", "mug", "cup") // actual solution
+      ))
+    }
+    "find the possible solutions for an seven-by-seven grid" in {
+      val grid = Grid.fromString(
+        """tsyuaos
+          |skalkrw
+          |teoeome
+          |axnshle
+          |msooslr
+          |estsbru
+          |ebalcly""".stripMargin)
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(8, 9, 6, 5, 8, 5, 8)))
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
+        Seq("homework", "classmate", "lesson", "essay", "textbook", "ruler", "syllabus"),
+        Seq("homework", "classmate", "lesson", "essay", "textbook", "ruler", "syllabus"),
+        Seq("homework", "classmate", "lesson", "ruler", "syllabus", "essay", "textbook"),
+        Seq("homework", "classmate", "lesson", "ruler", "syllabus", "essay", "textbook")
+      ))
+    }
+    "find the possible solutions for an eight-by-eight grid" in {
+      val grid = Grid.fromString(
+        """ernngnor
+          |vsoiyien
+          |rviratdo
+          |ieteprac
+          |etaenbai
+          |cligiplm
+          |umrneiur
+          |otvanatl""".stripMargin)
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(11, 11, 11, 10, 6, 6, 9)))
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
+        Seq("engineering", "application", "ultramodern", "multiverse", "vector", "binary", "variation"),
+        Seq("engineering", "application", "ultramodern", "multiverse", "binary", "vector", "variation")
       ))
     }
     "find nothing when there are no possible words" in {
