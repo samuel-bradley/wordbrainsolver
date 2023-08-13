@@ -165,6 +165,7 @@ class PuzzleSolverSpec extends Specification{
       ))
     }
     "find the possible solutions for an seven-by-seven grid" in {
+      // https://wordbrain.info/en/themes/school2/
       val grid = Grid.fromString(
         """tsyuaos
           |skalkrw
@@ -182,6 +183,7 @@ class PuzzleSolverSpec extends Specification{
       ))
     }
     "find the possible solutions for an eight-by-eight grid" in {
+      // https://wordbrain.info/en/themes/technology3/
       val grid = Grid.fromString(
         """ernngnor
           |vsoiyien
@@ -198,6 +200,7 @@ class PuzzleSolverSpec extends Specification{
       ))
     }
     "find the possible solutions for an eight-by-eight grid with more words" in {
+      // https://wordbrain.info/en/themes/in-the-kitchen3/
       val grid = Grid.fromString(
         """nucetakt
           |kanepoae
