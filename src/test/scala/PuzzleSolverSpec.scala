@@ -2,15 +2,17 @@ package com.wordbrainsolver.application
 
 import org.specs2.mutable.Specification
 
-import java.nio.file.Path
+import java.nio.file.{Files, Path}
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class PuzzleSolverSpec extends Specification{
 
   // https://www-personal.umich.edu/~jlawler/wordlist
   // TODO some words used in the game don't appear in the dictionary, so this file is obviously not sufficient
+  private val dictionaryPath = Path.of("C:\\Users\\Samuel\\Documents\\wordbrainsolver\\src\\main\\scala\\dictionary.txt")
   private val additionalWords = Seq("ribs", "barista")
-  private val dictionary = Dictionary.fromFile(Path.of("C:\\Users\\Samuel\\Documents\\wordbrainsolver\\src\\main\\scala\\dictionary.txt"), additionalWords)
-  private val solver = new PuzzleSolver(dictionary)
+  private val dictionary = new ListDictionary(Files.readAllLines(dictionaryPath).asScala.toSeq ++ additionalWords)
+  private val solver = new PuzzleSolver(dictionaryPath, additionalWords)
 
   "Solving a puzzle" should {
     "find the correct path and word for the smallest possible" in {
@@ -177,7 +179,7 @@ class PuzzleSolverSpec extends Specification{
       """thk
         |etc
         |eba""".stripMargin)
-    solver.findGridPathsLeavingNextWordFindable(grid, WordToFind(4, ""), Some(5)).map { path: GridPath =>
+    solver.findGridPathsLeavingNextWordFindable(grid, WordToFind(4, ""), Some(5), dictionary).map { path: GridPath =>
       path.cells.map(grid.letterAt(_).getOrElse("")).mkString
     } must containTheSameElementsAs(Seq( // same as below, but missing one "bath" and two "beth"s
       "abet",
@@ -214,7 +216,7 @@ class PuzzleSolverSpec extends Specification{
         """thk
           |etc
           |eba""".stripMargin)
-      solver.findGridPathsStartingAnywhere(grid, WordToFind(4, "")).map(grid.wordAt) must containTheSameElementsAs(Seq(
+      solver.findGridPathsStartingAnywhere(grid, WordToFind(4, ""), dictionary).map(grid.wordAt) must containTheSameElementsAs(Seq(
         "abet",
         "abet",
         "abet",
@@ -251,7 +253,7 @@ class PuzzleSolverSpec extends Specification{
           |hcl
           |aic
           |cyb""".stripMargin)
-      solver.findGridPathsStartingAnywhere(grid, WordToFind(7, "")).map(grid.wordAt) must containTheSameElementsAs(Seq(
+      solver.findGridPathsStartingAnywhere(grid, WordToFind(7, ""), dictionary).map(grid.wordAt) must containTheSameElementsAs(Seq(
         "acyclic", "bicycle"
       ))
     }
@@ -263,7 +265,7 @@ class PuzzleSolverSpec extends Specification{
         """thk
           |etc
           |eba""".stripMargin)
-      solver.findGridPathsStartingAtCell(grid, Cell(3, 2), WordToFind(4, "")) must containTheSameElementsAs(Seq(
+      solver.findGridPathsStartingAtCell(grid, Cell(3, 2), WordToFind(4, ""), dictionary) must containTheSameElementsAs(Seq(
         GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 3), Cell(1, 2))), // bach
         GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 3), Cell(1, 3))), // back
         GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 2), Cell(2, 1))), // bate
@@ -287,7 +289,7 @@ class PuzzleSolverSpec extends Specification{
           |hcl
           |aic
           |cyb""".stripMargin)
-      solver.findGridPathsStartingAtCell(grid, Cell(4, 3), WordToFind(7, "")).map(grid.wordAt) must containTheSameElementsAs(Seq(
+      solver.findGridPathsStartingAtCell(grid, Cell(4, 3), WordToFind(7, ""), dictionary).map(grid.wordAt) must containTheSameElementsAs(Seq(
         "bicycle"
       ))
       "return the correct paths for a grid with empty letters" in {
@@ -297,7 +299,7 @@ class PuzzleSolverSpec extends Specification{
             |__ar
             |__ie
             |__ts""".stripMargin)
-        solver.findGridPathsStartingAtCell(grid, Cell(5, 4), WordToFind(5, "")).map(grid.wordAt) must containTheSameElementsAs(Seq(
+        solver.findGridPathsStartingAtCell(grid, Cell(5, 4), WordToFind(5, ""), dictionary).map(grid.wordAt) must containTheSameElementsAs(Seq(
           "seria", "stirk", "steak"
         ))
       }
@@ -311,7 +313,7 @@ class PuzzleSolverSpec extends Specification{
           |etc
           |eba""".stripMargin)
       val gridPath = GridPath(Seq(Cell(3, 2))) // b...
-      solver.findPossibleNextCellsForGridPath(grid, gridPath, WordToFind(4, "")) must containTheSameElementsAs(Seq(
+      solver.findPossibleNextCellsForGridPath(grid, gridPath, WordToFind(4, ""), dictionary) must containTheSameElementsAs(Seq(
         Cell(2, 1), // be...
         Cell(3, 1), // be...
         Cell(3, 3) // ba...
