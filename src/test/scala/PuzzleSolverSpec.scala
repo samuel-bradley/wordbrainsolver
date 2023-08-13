@@ -197,6 +197,21 @@ class PuzzleSolverSpec extends Specification{
         Seq("engineering", "application", "ultramodern", "multiverse", "binary", "vector", "variation")
       ))
     }
+    "find the possible solutions for an eight-by-eight grid with more words" in {
+      val grid = Grid.fromString(
+        """nucetakt
+          |kanepoae
+          |nevshler
+          |isieocnt
+          |cetcokse
+          |squhtsal
+          |asnseitl
+          |bauedtmi""".stripMargin)
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(9, 4, 7, 5, 4, 7, 10, 6, 8, 4)))
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
+        Seq("chocolate", "dish", "banquet", "sieve", "sink", "toaster", "sustenance", "kettle", "saucepan", "milk")
+      ))
+    }
     "find nothing when there are no possible words" in {
       val grid = Grid.fromString(
         """xxx
