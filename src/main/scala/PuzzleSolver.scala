@@ -3,7 +3,7 @@ package com.wordbrainsolver.application
 import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-class PuzzleSolver(dictionaryPath: Path, additionalWords: Seq[String]) {
+class PuzzleSolver(dictionaryPath: Path) {
 
   def findPossibleSolutions(puzzle: Puzzle): Seq[Seq[GridPathAndWord]] = {
     val dictionary = buildDictionary(puzzle)
@@ -12,7 +12,7 @@ class PuzzleSolver(dictionaryPath: Path, additionalWords: Seq[String]) {
   }
 
   private def buildDictionary(puzzle: Puzzle) = {
-    val words: Seq[String] = Files.readAllLines(dictionaryPath).asScala.toSeq ++ additionalWords
+    val words: Seq[String] = Files.readAllLines(dictionaryPath).asScala.toSeq
     val relevantWords: Seq[String] = words.filter { word: String =>
       puzzle.wordsToFind.map(_.length).contains(word.length) && word.forall { c: Char =>
         puzzle.grid.letters.flatten.contains(c)

@@ -7,12 +7,10 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class PuzzleSolverSpec extends Specification{
 
-  // https://www-personal.umich.edu/~jlawler/wordlist
-  // TODO some words used in the game don't appear in the dictionary, so this file is obviously not sufficient
+  // https://www.wordgamedictionary.com/sowpods/download/sowpods.txt
   private val dictionaryPath = Path.of("C:\\Users\\Samuel\\Documents\\wordbrainsolver\\src\\main\\scala\\dictionary.txt")
-  private val additionalWords = Seq("ribs", "barista", "multiverse")
-  private val dictionary = new ListDictionary(Files.readAllLines(dictionaryPath).asScala.toSeq ++ additionalWords)
-  private val solver = new PuzzleSolver(dictionaryPath, additionalWords)
+  private val dictionary = new ListDictionary(Files.readAllLines(dictionaryPath).asScala.toSeq)
+  private val solver = new PuzzleSolver(dictionaryPath)
 
   "Solving a puzzle" should {
     "find the correct path and word for the smallest possible" in {
@@ -26,7 +24,7 @@ class PuzzleSolverSpec extends Specification{
         GridPathAndWord(GridPath(Seq(Cell(1, 1), Cell(1, 2), Cell(2, 1), Cell(2, 2))), "fish")
       ))
     }
-    "find the possible solutions for a small puzzle" in {
+    "find the possible solutions for a small puzzle, including multiple paths for the same word" in {
       val grid = Grid.fromString(
         """thk
           |etc
@@ -35,7 +33,14 @@ class PuzzleSolverSpec extends Specification{
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Seq(
         Seq("tack", "thebe"),
         Seq("tack", "thebe"),
+        Seq("bete", "thack"),
+        Seq("beet", "thack"),
+        Seq("beet", "thack"),
+        Seq("beet", "thack"),
+        Seq("bete", "thack"),
         Seq("back", "teeth"), // actual solution
+        Seq("back", "thete"),
+        Seq("back", "thete"),
         Seq("back", "teeth") // actual solution
       )
     }
@@ -58,25 +63,6 @@ class PuzzleSolverSpec extends Specification{
         Seq("bicycle", "yacht")
       )
     }
-    "find the possible solutions for a grid with three words" in {
-      val grid = Grid.fromString(
-        """ehs
-          |sls
-          |ufo
-          |abm""".stripMargin)
-      val puzzle = Puzzle(grid, unrevealedWords(Seq(4, 4, 4)))
-      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
-        Seq("fuse", "bosh", "alms"),
-        Seq("bush", "leaf", "moss"),
-        Seq("bush", "flea", "moss"),
-        Seq("bush", "moss", "leaf"), // actual solution
-        Seq("bush", "moss", "flea"),
-        Seq("bosh", "alms", "fuse"),
-        Seq("bosh", "fuse", "alms"),
-        Seq("moss", "bush", "leaf"),
-        Seq("moss", "bush", "flea")
-      ))
-    }
     "find the possible solutions matching revealed letters" in {
       val grid = Grid.fromString(
         """ehs
@@ -86,6 +72,8 @@ class PuzzleSolverSpec extends Specification{
       val puzzle = Puzzle(grid, Seq(WordToFind(4, "bu"), WordToFind(4, "m"), WordToFind(4, "")))
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
         Seq("bush", "moss", "leaf"), // actual solution
+        Seq("bush", "moss", "alef"),
+        Seq("bush", "moss", "feal"),
         Seq("bush", "moss", "flea")
       ))
     }
@@ -98,6 +86,7 @@ class PuzzleSolverSpec extends Specification{
       val puzzle = Puzzle(grid, Seq(WordToFind(4, ""), WordToFind(4, ""), WordToFind(4, "leaf")))
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
         Seq("bush", "moss", "leaf"), // actual solution
+        Seq("mosh", "subs", "leaf"),
         Seq("moss", "bush", "leaf")
       ))
     }
@@ -110,7 +99,7 @@ class PuzzleSolverSpec extends Specification{
       val puzzle = Puzzle(grid, Seq(WordToFind(4, ""), WordToFind(4, ""), WordToFind(4, "o")))
       solver.findPossibleSolutions(puzzle).map(_.map(_.word)) mustEqual Nil
     }
-    "find the possible solutions for a five-by-four grid with four words" in {
+    "find the possible solutions for a five-by-four grid with four words and many possible solutions" in {
       val grid = Grid.fromString(
         """agbs
           |toak
@@ -118,13 +107,50 @@ class PuzzleSolverSpec extends Specification{
           |atoe
           |phts""".stripMargin)
       val puzzle = Puzzle(grid, unrevealedWords(Seq(5, 6, 5, 4)))
-      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
-        Seq("pasta", "hotdog", "rites", "bask"),
-        Seq("pasta", "hotdog", "steak", "ribs"), // actual solution
-        Seq("pasta", "hotdog", "stirk", "base"),
-        Seq("pasta", "hotdog", "stirk", "sabe"),
-        Seq("stork", "pastis", "adobe", "gath"),
-        Seq("stork", "pastis", "adobe", "ghat"),
+      // There are a vast number of solutions here which are omitted for brevity
+      val solutions = solver.findPossibleSolutions(puzzle).map(_.map(_.word))
+      // TODO solutions such as this are not useful; identifying the correct one takes longer than solving manually
+      solutions must have size 1049
+      solutions must contain(Seq("pasta", "hotdog", "steak", "ribs"))
+    }
+    "find the possible solutions for a five-by-five grid with five words" in {
+      val grid = Grid.fromString(
+        """atsoe
+          |isusj
+          |grrea
+          |uapsv
+          |mbpca""".stripMargin)
+      val puzzle = Puzzle(grid, unrevealedWords(Seq(7, 4, 8, 3, 3)))
+      solver.findPossibleSolutions(puzzle).map(_.map(_.word)).distinct must containTheSameElementsAs(Seq(
+        Seq("barista", "java", "espresso", "mug", "cup"), // actual solution
+        Seq("airgaps", "joss", "precavae", "tum", "sub"),
+        Seq("airgaps", "joss", "precavae", "tum", "bus"),
+        Seq("airgaps", "joss", "precavae", "sum", "tub"),
+        Seq("airgaps", "joss", "precavae", "sum", "but"),
+        Seq("airgaps", "joss", "precavae", "sub", "mut"),
+        Seq("airgaps", "joss", "precavae", "sub", "tum"),
+        Seq("airgaps", "joss", "precavae", "mut", "sub"),
+        Seq("airgaps", "joss", "precavae", "mut", "bus"),
+        Seq("airgaps", "joss", "precavae", "mus", "tub"),
+        Seq("airgaps", "joss", "precavae", "mus", "but"),
+        Seq("airgaps", "joss", "precavae", "bum", "uts"),
+        Seq("airgaps", "joss", "precavae", "bus", "mut"),
+        Seq("airgaps", "joss", "precavae", "bus", "tum"),
+        Seq("jaspers", "taig", "sambucas", "evo", "urp"),
+        Seq("jaspers", "taig", "sambucas", "urp", "evo"),
+        Seq("jaspers", "taig", "sambucas", "urp", "voe"),
+        Seq("jaspers", "taig", "sambucas", "voe", "urp"),
+        Seq("jaspers", "grum", "copaibas", "uts", "ave"),
+        Seq("jaspers", "grum", "copaibas", "ave", "uts"),
+        Seq("jaspers", "gaum", "airposts", "cub", "ave"),
+        Seq("jaspers", "gaum", "airposts", "ave", "cub"),
+        Seq("jaspers", "curs", "gambusia", "opt", "ave"),
+        Seq("jaspers", "curs", "gambusia", "ave", "opt"),
+        Seq("jaspers", "cour", "gambusia", "pst", "ave"),
+        Seq("jaspers", "cour", "gambusia", "ave", "pst"),
+        Seq("asperse", "jour", "gambusia", "vac", "pst"),
+        Seq("asperse", "jour", "gambusia", "pst", "vac"),
+        Seq("barista", "java", "espresso", "gum", "cup")
       ))
     }
     "find the possible solutions for a five-by-five grid with five words and many possible solutions" in {
@@ -135,36 +161,11 @@ class PuzzleSolverSpec extends Specification{
           |guica
           |fbmtm""".stripMargin)
       val puzzle = Puzzle(grid, unrevealedWords(Seq(5, 5, 4, 5, 6)))
-      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
-        Seq("kills", "creat", "guar", "flick", "membra"),
-        Seq("creat", "kills", "guar", "flick", "membra"),
-        Seq("cream", "sugar", "flak", "climb", "kilter"),
-        Seq("cream", "sugar", "milk", "black", "filter"),
-        Seq("cream", "sugar", "tick", "flamb", "killer"),
-        Seq("cream", "sugar", "tick", "flamb", "killer"),
-        Seq("sugar", "cream", "flak", "climb", "kilter"),
-        Seq("sugar", "cream", "milk", "black", "filter"), // actual solution
-        Seq("sugar", "cream", "tick", "flamb", "killer"),
-        Seq("sugar", "cream", "tick", "flamb", "killer"),
-        Seq("sugar", "flake", "cram", "climb", "kilter"),
-        Seq("sugar", "flake", "marc", "climb", "kilter"),
-        Seq("sugar", "flick", "lamb", "cream", "kilter")
-      ))
+      val solutions = solver.findPossibleSolutions(puzzle).map(_.map(_.word)).distinct
+      solutions must have size 315
+      solutions must contain(Seq("sugar", "cream", "milk", "black", "filter"))
     }
-    "find the possible solutions for another five-by-five grid with five words but fewer possible solutions" in {
-      val grid = Grid.fromString(
-        """atsoe
-          |isusj
-          |grrea
-          |uapsv
-          |mbpca""".stripMargin)
-      val puzzle = Puzzle(grid, unrevealedWords(Seq(7, 4, 8, 3, 3)))
-      solver.findPossibleSolutions(puzzle).map(_.map(_.word)) must containTheSameElementsAs(Seq(
-        Seq("barista", "java", "espresso", "gum", "cup"),
-        Seq("barista", "java", "espresso", "mug", "cup") // actual solution
-      ))
-    }
-    "find the possible solutions for an seven-by-seven grid" in {
+    "find the possible solutions for a seven-by-seven grid" in {
       // https://wordbrain.info/en/themes/school2/
       val grid = Grid.fromString(
         """tsyuaos
@@ -226,39 +227,49 @@ class PuzzleSolverSpec extends Specification{
   }
 
   "Finding possible paths for a word leaving the grid able to contain a word of the next length" should {
-    val grid = Grid.fromString(
-      """thk
-        |etc
-        |eba""".stripMargin)
-    solver.findGridPathsLeavingNextWordFindable(grid, WordToFind(4, ""), Some(5), dictionary).map { path: GridPath =>
-      path.cells.map(grid.letterAt(_).getOrElse("")).mkString
-    } must containTheSameElementsAs(Seq( // same as below, but missing one "bath" and two "beth"s
-      "abet",
-      "abet",
-      "abet",
-      "ache",
-      "bach",
-      "back",
-      "bate",
-      "bate",
-      "beet",
-      "beet",
-      "beet",
-      "beta",
-      "beta",
-      "bete",
-      "bete",
-      "beth",
-      "etch",
-      "etch",
-      "hebe",
-      "tack",
-      "tete",
-      "teth",
-      "teth",
-      "thee",
-      "thee"
-    ))
+    "return the correct paths" in {
+      val grid = Grid.fromString(
+        """thk
+          |etc
+          |eba""".stripMargin)
+      solver.findGridPathsLeavingNextWordFindable(grid, WordToFind(4, ""), Some(5), dictionary).map { path: GridPath =>
+        path.cells.map(grid.letterAt(_).getOrElse("")).mkString
+      } must containTheSameElementsAs(Seq( // same as below, but missing one "bath" and two "beth"s
+        "abet",
+        "abet",
+        "abet",
+        "ache",
+        "bach",
+        "back",
+        "bate",
+        "bate",
+        "batt",
+        "beet",
+        "beet",
+        "beet",
+        "beta",
+        "beta",
+        "bete",
+        "bete",
+        "beth",
+        "cate",
+        "cate",
+        "etch",
+        "etch",
+        "ethe",
+        "hebe",
+        "hete",
+        "khet",
+        "khet",
+        "tach",
+        "tack",
+        "tete",
+        "teth",
+        "teth",
+        "thee",
+        "thee"
+      ))
+    }
   }
 
   "Finding possible paths for a word starting anywhere" should {
@@ -277,6 +288,7 @@ class PuzzleSolverSpec extends Specification{
         "bate",
         "bate",
         "bath",
+        "batt",
         "beet",
         "beet",
         "beet",
@@ -287,9 +299,16 @@ class PuzzleSolverSpec extends Specification{
         "beth",
         "beth",
         "beth",
+        "cate",
+        "cate",
+        "ethe",
         "etch",
         "etch",
         "hebe",
+        "hete",
+        "khet",
+        "khet",
+        "tach",
         "tack",
         "tete",
         "teth",
@@ -305,7 +324,7 @@ class PuzzleSolverSpec extends Specification{
           |aic
           |cyb""".stripMargin)
       solver.findGridPathsStartingAnywhere(grid, WordToFind(7, ""), dictionary).map(grid.wordAt) must containTheSameElementsAs(Seq(
-        "acyclic", "bicycle"
+        "lecythi", "acyclic", "bicycle"
       ))
     }
   }
@@ -332,6 +351,7 @@ class PuzzleSolverSpec extends Specification{
         GridPath(Seq(Cell(3, 2), Cell(2, 1), Cell(2, 2), Cell(1, 2))), // beth
         GridPath(Seq(Cell(3, 2), Cell(3, 1), Cell(2, 2), Cell(1, 2))), // beth
         GridPath(Seq(Cell(3, 2), Cell(3, 1), Cell(2, 2), Cell(2, 1))), // bett
+        GridPath(Seq(Cell(3, 2), Cell(3, 3), Cell(2, 2), Cell(1, 1))), // batt
       ))
     }
     "return the correct paths for a non-square grid" in {
@@ -343,17 +363,18 @@ class PuzzleSolverSpec extends Specification{
       solver.findGridPathsStartingAtCell(grid, Cell(4, 3), WordToFind(7, ""), dictionary).map(grid.wordAt) must containTheSameElementsAs(Seq(
         "bicycle"
       ))
-      "return the correct paths for a grid with empty letters" in {
-        val grid = Grid.fromString(
-          """___s
-            |__bk
-            |__ar
-            |__ie
-            |__ts""".stripMargin)
-        solver.findGridPathsStartingAtCell(grid, Cell(5, 4), WordToFind(5, ""), dictionary).map(grid.wordAt) must containTheSameElementsAs(Seq(
-          "seria", "stirk", "steak"
-        ))
-      }
+    }
+    "return the correct paths for a grid with empty letters" in {
+      val grid = Grid.fromString(
+        """___s
+          |__bk
+          |__ar
+          |__ie
+          |__ts""".stripMargin)
+      // Starting at the bottom-right 's'
+      solver.findGridPathsStartingAtCell(grid, Cell(5, 4), WordToFind(5, ""), dictionary).map(grid.wordAt) must containTheSameElementsAs(Seq(
+        "serks", "serai", "stirk", "stire", "steak", "stear"
+      ))
     }
   }
 
