@@ -5,7 +5,7 @@ import org.specs2.mutable.Specification
 import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-class PuzzleSolverSpec extends Specification{
+class PuzzleSolverSpec extends Specification {
 
   // https://www.wordgamedictionary.com/sowpods/download/sowpods.txt
   private val dictionaryPath = Path.of("C:\\Users\\Samuel\\Documents\\wordbrainsolver\\src\\main\\scala\\dictionary.txt")

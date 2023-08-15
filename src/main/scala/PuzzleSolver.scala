@@ -13,11 +13,7 @@ class PuzzleSolver(dictionaryPath: Path) {
 
   private def buildDictionary(puzzle: Puzzle) = {
     val words: Seq[String] = Files.readAllLines(dictionaryPath).asScala.toSeq
-    val relevantWords: Seq[String] = words.filter { word: String =>
-      puzzle.wordsToFind.map(_.length).contains(word.length) && word.forall { c: Char =>
-        puzzle.grid.letters.flatten.contains(c)
-      }
-    }
+    val relevantWords: Seq[String] = RelevantWordFinder.findRelevantWords(puzzle, words)
     SearchTreeDictionary.of(relevantWords)
   }
 
