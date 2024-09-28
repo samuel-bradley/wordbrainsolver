@@ -1,19 +1,20 @@
 package com.wordbrainsolver.application
 
 import java.nio.file.{Files, Path}
+import scala.collection.mutable
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class PuzzleSolver(dictionaryPath: Path) {
 
   def findPossibleSolutions(puzzle: Puzzle): Seq[Seq[GridPathAndWord]] = {
-    val dictionary = buildDictionary(puzzle)
+    val dictionary = time("buildDictionary")(buildDictionary(puzzle))
     val possiblePaths: Seq[PossiblePathsAndWords] = findPossibleGridPathsAndWords(puzzle.grid, puzzle.wordsToFind, dictionary)
     possiblePaths.flatMap(_.getGridPathsAndWords)
   }
 
   private def buildDictionary(puzzle: Puzzle) = {
     val words: Seq[String] = Files.readAllLines(dictionaryPath).asScala.toSeq
-    val relevantWords: Seq[String] = RelevantWordFinder.findRelevantWords(puzzle, words)
+    val relevantWords: Seq[String] = time("findRelevantWords")(RelevantWordFinder.findRelevantWords(puzzle, words))
     SearchTreeDictionary.of(relevantWords)
   }
 
@@ -55,7 +56,7 @@ class PuzzleSolver(dictionaryPath: Path) {
     pathsSoFar.flatMap { pathSoFar =>
       if (pathSoFar.cells.length == wordToFind.length) Seq(pathSoFar) else {
         // Extend each path so far by each of its possible next cells
-        val newPathsSoFar = findPossibleNextCellsForGridPath(grid, pathSoFar, wordToFind, dictionary).map(pathSoFar.add)
+        val newPathsSoFar = time("findPossibleNextCellsForGridPath")(findPossibleNextCellsForGridPath(grid, pathSoFar, wordToFind, dictionary).map(pathSoFar.add))
         findGridPathsStartingWithPartialPaths(grid, newPathsSoFar, wordToFind, dictionary)
       }
     }
@@ -66,8 +67,19 @@ class PuzzleSolver(dictionaryPath: Path) {
       .filterNot(gridPathSoFar.cells.contains) // exclude already-visited cells
       .filter { neighbour =>
         val putativeWordSoFar = grid.wordAt(gridPathSoFar) + grid.letterAt(neighbour).getOrElse("")
-        dictionary.wordExists(putativeWordSoFar, wordToFind.revealedPart, wordToFind.length)
+        time("wordExists")(dictionary.wordExists(putativeWordSoFar, wordToFind.revealedPart, wordToFind.length))
       }
   }
+
+  def time[R](label: String)(block: => R): R = {
+    val t0 = System.nanoTime()
+    val result = block // call-by-name
+    val t1 = System.nanoTime()
+    val ms = (t1 - t0) / 1e6
+    times(label) = times(label) + ms
+    result
+  }
+
+  val times: mutable.Map[String, Double] = mutable.Map("buildDictionary" -> 0.0, "findRelevantWords" -> 0.0, "findPossibleNextCellsForGridPath" -> 0.0, "wordExists" -> 0.0)
 
 }

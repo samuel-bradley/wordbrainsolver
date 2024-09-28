@@ -109,6 +109,7 @@ class PuzzleSolverSpec extends Specification {
       val puzzle = Puzzle(grid, unrevealedWords(Seq(5, 6, 5, 4)))
       // There are a vast number of solutions here which are omitted for brevity
       val solutions = solver.findPossibleSolutions(puzzle).map(_.map(_.word))
+      solver.times.foreach { case (label, time) => println(s"$label took $time ms") }
       // TODO solutions such as this are not useful; identifying the correct one takes longer than solving manually
       solutions must have size 1049
       solutions must contain(Seq("pasta", "hotdog", "steak", "ribs"))
@@ -121,7 +122,9 @@ class PuzzleSolverSpec extends Specification {
           |uapsv
           |mbpca""".stripMargin)
       val puzzle = Puzzle(grid, unrevealedWords(Seq(7, 4, 8, 3, 3)))
-      solver.findPossibleSolutions(puzzle).map(_.map(_.word)).distinct must containTheSameElementsAs(Seq(
+      val solutions = solver.findPossibleSolutions(puzzle).map(_.map(_.word)).distinct
+      solver.times.foreach { case (label, time) => println(s"$label took $time") }
+      solutions must containTheSameElementsAs(Seq(
         Seq("barista", "java", "espresso", "mug", "cup"), // actual solution
         Seq("airgaps", "joss", "precavae", "tum", "sub"),
         Seq("airgaps", "joss", "precavae", "tum", "bus"),
@@ -162,6 +165,7 @@ class PuzzleSolverSpec extends Specification {
           |fbmtm""".stripMargin)
       val puzzle = Puzzle(grid, unrevealedWords(Seq(5, 5, 4, 5, 6)))
       val solutions = solver.findPossibleSolutions(puzzle).map(_.map(_.word)).distinct
+      solver.times.foreach { case (label, time) => println(s"$label took $time") }
       solutions must have size 315
       solutions must contain(Seq("sugar", "cream", "milk", "black", "filter"))
     }
