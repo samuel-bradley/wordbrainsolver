@@ -9,3 +9,4 @@ lazy val root = (project in file("."))
   )
 
 libraryDependencies += "org.specs2" % "specs2-junit_2.13" % "4.19.2"
+libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"

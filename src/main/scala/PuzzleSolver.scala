@@ -2,6 +2,7 @@ package com.wordbrainsolver.application
 
 import java.nio.file.{Files, Path}
 import scala.collection.mutable
+import scala.collection.parallel.CollectionConverters.seqIsParallelizable
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class PuzzleSolver(dictionaryPath: Path) {
@@ -23,15 +24,16 @@ class PuzzleSolver(dictionaryPath: Path) {
     val pathsAndWords = findGridPathsLeavingNextWordFindable(grid, wordsToFind.head, wordsToFind.tail.headOption.map(_.length), dictionary).map {
       path => GridPathAndWord(path, grid.wordAt(path))
     }
+    // The next step is performed in parallel
     if (wordsToFind.length > 1) {
       // For each path for this word, recursively find paths for the next word, stopping if there are none
-      pathsAndWords.flatMap { pathAndWord =>
+      pathsAndWords.par.flatMap { pathAndWord =>
         val remainingPathsAndWords = findPossibleGridPathsAndWords(grid.withWordRemoved(pathAndWord.gridPath), wordsToFind.tail, dictionary)
         if (remainingPathsAndWords.nonEmpty) Some(PossiblePathsAndWords(pathAndWord, remainingPathsAndWords)) else None
-      }
+      }.seq.toSeq
     } else {
       // This is the last word to find - return the possible paths and words
-      pathsAndWords.map(pathAndWord => PossiblePathsAndWords(pathAndWord, Nil))
+      pathsAndWords.par.map(pathAndWord => PossiblePathsAndWords(pathAndWord, Nil)).seq.toSeq
     }
   }
 
