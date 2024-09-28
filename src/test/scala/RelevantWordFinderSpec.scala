@@ -21,11 +21,12 @@ class RelevantWordFinderSpec extends Specification {
       )
       RelevantWordFinder.findRelevantWords(puzzle, words) must containTheSameElementsAs(Seq("pasta", "hotdog", "steak", "ribs"))
     }
-    "return only words containing letters in the grid, even if they are the right length" in {
+    "return only words for which there are enough letters in the grid, even if they are the right length" in {
       val words = Seq(
         "quine", // length 5 but 'q' not in grid
         "pasta", "hotdog", "steak", "ribs", // actual solution
-        "vaxes" // length 5 but 'z' and 'x' not in grid
+        "vaxes", // length 5 but 'z' and 'x' not in grid
+        "babes" // length 5 but only one 'b' in the grid
       )
       RelevantWordFinder.findRelevantWords(puzzle, words) must containTheSameElementsAs(Seq("pasta", "hotdog", "steak", "ribs"))
     }

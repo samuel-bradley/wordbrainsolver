@@ -1,13 +1,24 @@
 package com.wordbrainsolver.application
 
 object RelevantWordFinder {
+  /**
+   * TODO: consider partially-completed words in the puzzle
+   * TODO: instead of identifying letter pairs that aren't in the grid, consider letter sequences that couldn't be made
+   * @return the subset of the given words which could plausibly be one of the hidden words in the puzzle
+   */
   def findRelevantWords(puzzle: Puzzle, words: Seq[String]): Seq[String] = {
     val separatedPairs: Seq[Pair] = RelevantWordFinder.findSeparatedPairs(puzzle.grid)
+    val gridLetters: Seq[Char] = puzzle.grid.letters.flatten
     words.filter { word: String =>
       puzzle.wordsToFind.map(_.length).contains(word.length) &&
-        word.forall { c: Char => puzzle.grid.letters.flatten.contains(c) } &&
+        gridContainsEnoughLettersForWord(gridLetters, word) &&
         separatedPairs.forall { pair: Pair => !word.contains(pair.alphabetically) && !word.contains(pair.reverseAlphabetically) }
     }
+  }
+
+  private def gridContainsEnoughLettersForWord(gridLetters: Seq[Char], word: String): Boolean = {
+    val lettersInWord = word.distinct.map(letter => (letter, word.count(_ == letter))).toMap
+    lettersInWord.forall { case (letter, count) => gridLetters.count(_ == letter) >= count }
   }
 
   private def findSeparatedPairs(grid: Grid): Seq[Pair] = {
