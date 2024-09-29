@@ -6,17 +6,10 @@ object RelevantWordFinder {
    * @return the subset of the given words which could plausibly be one of the hidden words in the puzzle
    */
   def findRelevantWords(puzzle: Puzzle, words: Seq[String]): Seq[String] = {
-    val gridLetters: Seq[Char] = puzzle.grid.letters.flatten
     words.filter { word: String =>
       puzzle.wordsToFind.map(_.length).contains(word.length) &&
-        gridContainsEnoughLettersForWord(gridLetters, word) &&
         wordHasLettersInConsecutiveGridColumns(puzzle.grid, word)
     }
-  }
-
-  private def gridContainsEnoughLettersForWord(gridLetters: Seq[Char], word: String): Boolean = {
-    val lettersInWord = word.distinct.map(letter => (letter, word.count(_ == letter))).toMap
-    lettersInWord.forall { case (letter, count) => gridLetters.count(_ == letter) >= count }
   }
 
   private def wordHasLettersInConsecutiveGridColumns(grid: Grid, word: String): Boolean = {
