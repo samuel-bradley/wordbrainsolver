@@ -111,7 +111,7 @@ class PuzzleSolverSpec extends Specification {
       val solutions = solver.findPossibleSolutions(puzzle).map(_.map(_.word))
       solver.times.foreach { case (label, time) => println(s"$label took $time ms") }
       // TODO solutions such as this are not useful; identifying the correct one takes longer than solving manually
-      solutions must have size 1049
+      solutions must have size 1107
       solutions must contain(Seq("pasta", "hotdog", "steak", "ribs"))
     }
     "find the possible solutions for a five-by-five grid with five words" in {
@@ -153,7 +153,9 @@ class PuzzleSolverSpec extends Specification {
         Seq("jaspers", "cour", "gambusia", "ave", "pst"),
         Seq("asperse", "jour", "gambusia", "vac", "pst"),
         Seq("asperse", "jour", "gambusia", "pst", "vac"),
-        Seq("barista", "java", "espresso", "gum", "cup")
+        Seq("barista", "java", "espresso", "gum", "cup"),
+        Seq("barista", "java", "espresso", "cup", "gum"),
+        Seq("barista", "java", "espresso", "cup", "mug")
       ))
     }
     "find the possible solutions for a five-by-five grid with five words and many possible solutions" in {
@@ -236,7 +238,7 @@ class PuzzleSolverSpec extends Specification {
         """thk
           |etc
           |eba""".stripMargin)
-      solver.findGridPathsLeavingNextWordFindable(grid, WordToFind(4, ""), Some(5), dictionary).map { path: GridPath =>
+      solver.findGridPathsLeavingRemainingWordsFindable(grid, WordToFind(4, ""), Seq(5), dictionary).map { path: GridPath =>
         path.cells.map(grid.letterAt(_).getOrElse("")).mkString
       } must containTheSameElementsAs(Seq( // same as below, but missing one "bath" and two "beth"s
         "abet",

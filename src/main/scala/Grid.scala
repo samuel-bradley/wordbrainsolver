@@ -53,23 +53,25 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
     }
   }
 
-  private def indexToCell(index: Int): Cell = Cell(index / width + 1, index % width + 1)
-
-  private def findLetterIslandSizes(): Seq[Int] = {
-    val nonEmptyCols = (1 to width).filter(col => getColumn(letters, col).exists(_.isDefined))
+  def findLetterIslandSizes(): Seq[Int] = {
+    val populatedCols = (1 to width).filter(col => getColumn(letters, col).exists(_.isDefined))
     // Find the number of each non-empty column which is the first in a run of non-empty columns
-    val nonEmptyColGroupStartCols: Seq[Int] = nonEmptyCols.filter(col => nonEmptyCols.contains(col + 1) || col + 1 > width)
+    val populatedColGroupStartCols: Seq[Int] = populatedCols.filter(col => populatedCols.contains(col) && !populatedCols.contains(col - 1))
+    // Find the number of each non-empty column which is the last in a run of non-empty columns
+    val populatedColGroupEndCols: Seq[Int] = populatedCols.filter(col => populatedCols.contains(col) && !populatedCols.contains(col + 1))
     // Starting from each first non-empty column, build the group of the following non-empty columns
-    val nonEmptyColGroups: Seq[Seq[Int]] = nonEmptyColGroupStartCols.map { startCol =>
-      (startCol to width).takeWhile(col => nonEmptyCols.contains(col))
+    val populatedColGroups: Seq[Seq[Int]] = populatedColGroupStartCols.zip(populatedColGroupEndCols).map { case (startCol, endCol) =>
+      (startCol to endCol)
     }
-    nonEmptyColGroups.map { nonEmptyColGroup: Seq[Int] =>
+    populatedColGroups.map { nonEmptyColGroup: Seq[Int] =>
       // For each group of non-empty columns, sum the number of letters in each column
       nonEmptyColGroup.fold(0) { case (sum, col) =>
         sum + getColumn(letters, col).count(_.isDefined)
       }
     }
   }
+
+  private def indexToCell(index: Int): Cell = Cell(index / width + 1, index % width + 1)
 
   private def collapseLetters(letters: Seq[Option[Char]]): Seq[Option[Char]] = {
     val collapsedColumns: Seq[Seq[Option[Char]]] = (1 to width).map { col =>

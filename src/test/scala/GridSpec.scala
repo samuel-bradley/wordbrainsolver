@@ -181,4 +181,70 @@ class GridSpec extends Specification {
     }
   }
 
+  "finding the sizes of letter islands in the grid" should {
+    "return the size of the grid if all letters are populated" in {
+      val grid: Grid = Grid.fromString(
+        """abcde
+          |fghij
+          |klmno""".stripMargin)
+      grid.findLetterIslandSizes() mustEqual Seq(15)
+    }
+    "return the number of populated letters for one island with part of a row missing" in {
+      val grid: Grid = Grid.fromString(
+        """abc__
+          |fghij
+          |klmno""".stripMargin)
+      grid.findLetterIslandSizes() mustEqual Seq(13)
+    }
+    "return the number of populated letters for one island with an entire row missing" in {
+      val grid: Grid = Grid.fromString(
+        """_____
+          |fghij
+          |klmno""".stripMargin)
+      grid.findLetterIslandSizes() mustEqual Seq(10)
+    }
+    "return the number of populated letters for one island with part of a column missing" in {
+      val grid: Grid = Grid.fromString(
+        """abcd_
+          |fghi_
+          |klmno""".stripMargin)
+      grid.findLetterIslandSizes() mustEqual Seq(13)
+    }
+    "return the number of populated letters for one island with an entire column missing" in {
+      val grid: Grid = Grid.fromString(
+        """abcd_
+          |fghi_
+          |klmn_""".stripMargin)
+      grid.findLetterIslandSizes() mustEqual Seq(12)
+    }
+    "return the number of populated letters for one island with part of row and part of a column missing" in {
+      val grid: Grid = Grid.fromString(
+        """abc__
+          |fghi_
+          |klmno""".stripMargin)
+      grid.findLetterIslandSizes() mustEqual Seq(12)
+    }
+    "return the sizes of two islands" in {
+      val grid: Grid = Grid.fromString(
+        """ab_de
+          |fg_ij
+          |kl_no""".stripMargin)
+      grid.findLetterIslandSizes() mustEqual Seq(6, 6)
+    }
+    "return the sizes of two differently-shaped islands" in {
+      val grid: Grid = Grid.fromString(
+        """a____
+          |f_h_j
+          |k_mno""".stripMargin)
+      grid.findLetterIslandSizes() mustEqual Seq(3, 5)
+    }
+    "return the sizes of three islands" in {
+      val grid: Grid = Grid.fromString(
+        """a_c_e
+          |f_h_j
+          |k_m_o""".stripMargin)
+      grid.findLetterIslandSizes() mustEqual Seq(3, 3, 3)
+    }
+  }
+
 }

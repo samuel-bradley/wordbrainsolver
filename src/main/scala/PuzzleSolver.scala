@@ -21,7 +21,7 @@ class PuzzleSolver(dictionaryPath: Path) {
 
   private def findPossibleGridPathsAndWords(grid: Grid, wordsToFind: Seq[WordToFind], dictionary: Dictionary): Seq[PossiblePathsAndWords] = {
     // Find paths for this word length which would leave enough contiguous letters for the next word (if there is one)
-    val pathsAndWords = findGridPathsLeavingNextWordFindable(grid, wordsToFind.head, wordsToFind.tail.headOption.map(_.length), dictionary).map {
+    val pathsAndWords = findGridPathsLeavingRemainingWordsFindable(grid, wordsToFind.head, wordsToFind.tail.map(_.length), dictionary).map {
       path => GridPathAndWord(path, grid.wordAt(path))
     }
     // The next step is performed in parallel
@@ -37,11 +37,11 @@ class PuzzleSolver(dictionaryPath: Path) {
     }
   }
 
-  def findGridPathsLeavingNextWordFindable(grid: Grid, wordToFind: WordToFind, nextWordLength: Option[Int], dictionary: Dictionary): Seq[GridPath] = {
+  def findGridPathsLeavingRemainingWordsFindable(grid: Grid, wordToFind: WordToFind, remainingWordLengths: Seq[Int], dictionary: Dictionary): Seq[GridPath] = {
     findGridPathsStartingAnywhere(grid, wordToFind, dictionary).filter { gridPath =>
-      nextWordLength match {
-        case Some(length) => grid.withWordRemoved(gridPath).wordOfLengthCouldExist(length)
-        case None => true
+      remainingWordLengths match {
+        case lengths if lengths.nonEmpty => lengths.forall(length => grid.withWordRemoved(gridPath).wordOfLengthCouldExist(length))
+        case _ => true
       }
     }
   }
