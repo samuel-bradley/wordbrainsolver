@@ -113,6 +113,21 @@ class GridSpec extends Specification {
     }
   }
 
+  "retrieving the cells of all non-blank letters within one column" should {
+    val grid: Grid = Grid.fromString(
+      """ab_x
+        |defy
+        |ghiz""".stripMargin
+    )
+    "return the correct cells" in {
+      grid.nonEmptyCellsWithinOneColumn(Cell(2, 2)) must containTheSameElementsAs(Seq(
+        Cell(1, 1), Cell(1, 2),
+        Cell(2, 1), Cell(2, 3),
+        Cell(3, 1), Cell(3, 2), Cell(3, 3),
+      ))
+    }
+  }
+
   "removing a word from a grid" should {
     "return a new grid with empty letters collapsed" in {
       val grid: Grid = Grid.fromString(

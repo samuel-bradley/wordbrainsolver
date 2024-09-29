@@ -30,11 +30,12 @@ class RelevantWordFinderSpec extends Specification {
       )
       RelevantWordFinder.findRelevantWords(puzzle, words) must containTheSameElementsAs(Seq("pasta", "hotdog", "steak", "ribs"))
     }
-    "return only words not containing consecutive pairs of letters which can never be consecutive in the grid, even if they are the right length" in {
+    "return only words not containing sequences not found in consecutive columns in the grid, even if they are the right length" in {
       val words = Seq(
         "prat", // length 4 but 'p' and 'r' can never be consecutive
         "pasta", "hotdog", "steak", "ribs", // actual solution
-        "drat" // length 4 but 'd' and 'r' can never be consecutive
+        "drat", // length 4 but 'd' and 'r' can never be consecutive
+        "pokes" // length 5 and letters exist in consecutive pairs in, grid but not in consecutive columns overall
       )
       RelevantWordFinder.findRelevantWords(puzzle, words) must containTheSameElementsAs(Seq("pasta", "hotdog", "steak", "ribs"))
     }

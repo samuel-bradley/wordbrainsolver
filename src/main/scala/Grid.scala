@@ -23,8 +23,13 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
       .filter(cell => cellIsInGrid(cell) && letterAt(cell).isDefined)
   }
 
+  def nonEmptyCellsWithinOneColumn(originCell: Cell): Seq[Cell] = {
+    (for (row <- 1 to height; col <- originCell.col - 1 to originCell.col + 1) yield (row, col))
+      .map { case (row, col) => Cell(row, col) }
+      .filter(cell => cellIsInGrid(cell) && letterAt(cell).isDefined && cell != originCell)
+  }
+
   def withWordRemoved(gridPath: GridPath): Grid = {
-    def indexToCell(index: Int): Cell = Cell(index / width + 1, index % width + 1)
     val lettersWithNewEmpties: Seq[Option[Char]] = letters.zipWithIndex.map { case (letter: Option[Char], index: Int) =>
         if (gridPath.cells.contains(indexToCell(index))) None
         else letter
@@ -41,6 +46,14 @@ case class Grid(letters: Seq[Option[Char]], width: Int) {
       if (letterAt(cell).isDefined) Some(cell) else None
     }
   }
+
+  def locationsOf(letter: Option[Char]): Seq[Cell] = {
+    letters.zipWithIndex.filter(_._1 == letter).map {
+      case (_, index) => indexToCell(index)
+    }
+  }
+
+  private def indexToCell(index: Int): Cell = Cell(index / width + 1, index % width + 1)
 
   private def findLetterIslandSizes(): Seq[Int] = {
     val nonEmptyCols = (1 to width).filter(col => getColumn(letters, col).exists(_.isDefined))
